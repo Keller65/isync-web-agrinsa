@@ -2,6 +2,7 @@ export interface OrderLineType {
   itemCode: string;
   itemDescription: string;
   itemName: string;
+  suppCatNum?: string;
   barCode: string;
   quantity: number;
   priceAfterVAT?: number;

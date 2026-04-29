@@ -1,6 +1,6 @@
 {
   "name": "isync-web-demo",
-  "version": "1.01204.26",
+  "version": "1.2904.26",
   "private": true,
   "scripts": {
     "dev": "next dev",

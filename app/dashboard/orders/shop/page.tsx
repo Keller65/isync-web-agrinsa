@@ -382,6 +382,8 @@ function ProductCard({ product }: { product: Product }) {
 
   const tier = product.tiers?.[0]
   const finalPrice = tier ? tier.price : product.price
+  const isFletes = product.itemName?.toUpperCase().includes('FLETES')
+  const canEditPrice = isFletes || product.priceListNum !== 11
 
   const fetchAnalytics = useCallback(async () => {
     if (!token || !selectedCustomer) return
@@ -712,11 +714,11 @@ function ProductCard({ product }: { product: Product }) {
                           <span className="font-bold text-lg mr-1">L.</span>
                           <Input
                             type="text"
-                            className={`w-40 font-bold text-lg h-11 focus-visible:ring-primary tabular-nums ${!isPriceValid ? 'border-destructive bg-destructive/10 focus-visible:ring-destructive' : ''} ${product.priceListNum === 11 ? 'bg-muted text-muted-foreground' : ''}`}
+                            className={`w-40 font-bold text-lg h-11 focus-visible:ring-primary tabular-nums ${!isPriceValid ? 'border-destructive bg-destructive/10 focus-visible:ring-destructive' : ''} ${!canEditPrice ? 'bg-muted text-muted-foreground' : ''}`}
                             value={editablePriceText}
                             onChange={handlePriceChange}
                             onBlur={handlePriceBlur}
-                            readOnly={product.priceListNum === 11}
+                            readOnly={!canEditPrice}
                           />
                         </div>
                         {!isPriceValid && (
@@ -733,7 +735,7 @@ function ProductCard({ product }: { product: Product }) {
                       </div>
                     </div>
 
-                    {product.priceListNum === 11 && (
+                    {(product.priceListNum === 11 && !isFletes) && (
                       <div>
                         <p className="text-xs font-bold text-muted-foreground uppercase mb-2">Descuento</p>
                         <div className="flex items-center gap-1">

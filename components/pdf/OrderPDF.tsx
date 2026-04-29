@@ -101,14 +101,15 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: 'bold',
   },
-  thCode: { width: '10%' },
-  thDesc: { width: '25%' },
-  thCant: { width: '8%', textAlign: 'center' },
-  thPU: { width: '12%', textAlign: 'right' },
-  thImporte: { width: '12%', textAlign: 'right' },
-  thISV: { width: '10%', textAlign: 'right' },
-  thTaxCode: { width: '8%', textAlign: 'center' },
-  thTotal: { width: '15%', textAlign: 'right' },
+  thCode: { width: '9%' },
+  thSKU: { width: '9%' },
+  thDesc: { width: '27%' },
+  thCant: { width: '7%', textAlign: 'center' },
+  thPU: { width: '11%', textAlign: 'right' },
+  thImporte: { width: '11%', textAlign: 'right' },
+  thISV: { width: '8%', textAlign: 'right' },
+  thTaxCode: { width: '5%', textAlign: 'center' },
+  thTotal: { width: '17%', textAlign: 'right' },
 
   tableRow: {
     flexDirection: 'row',
@@ -117,23 +118,24 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 4,
   },
+
+  tdCode: { width: '9%', fontSize: 8 },
+  tdSKU: { width: '9%', fontSize: 8 },
+  tdDesc: { width: '27%', fontSize: 8 },
+  tdCant: { width: '7%', fontSize: 8, textAlign: 'center' },
+  tdPU: { width: '11%', fontSize: 8, textAlign: 'right' },
+  tdImporte: { width: '11%', fontSize: 8, textAlign: 'right' },
+  tdISV: { width: '8%', fontSize: 8, textAlign: 'right' },
+  tdTaxCode: { width: '5%', fontSize: 8, textAlign: 'center' },
+  tdTotal: { width: '17%', fontSize: 8, textAlign: 'right' },
+
   emptyRow: {
     flexDirection: 'row',
     borderBottomWidth: 0.5,
     borderColor: '#eee',
     paddingVertical: 6,
     paddingHorizontal: 4,
-    height: 24,
   },
-
-  tdCode: { width: '10%', fontSize: 9 },
-  tdDesc: { width: '25%', fontSize: 9 },
-  tdCant: { width: '8%', fontSize: 9, textAlign: 'center' },
-  tdPU: { width: '12%', fontSize: 9, textAlign: 'right' },
-  tdImporte: { width: '12%', fontSize: 9, textAlign: 'right' },
-  tdISV: { width: '10%', fontSize: 9, textAlign: 'right' },
-  tdTaxCode: { width: '8%', fontSize: 9, textAlign: 'center' },
-  tdTotal: { width: '15%', fontSize: 9, textAlign: 'right' },
 
   footerSection: {
     flexDirection: 'row',
@@ -240,6 +242,7 @@ const OrderPDF: React.FC<OrderPDFProps> = ({ order, sellerName = '' }) => {
     productsViews.push(
       <View key={item.itemCode || index} style={styles.tableRow}>
         <Text style={styles.tdCode}>{item.itemCode ?? ""}</Text>
+        <Text style={styles.tdSKU}>{item.suppCatNum ?? ""}</Text>
         <Text style={styles.tdDesc}>{item.itemName ?? ""}</Text>
         <Text style={styles.tdCant}>{quantity.toFixed(2)}</Text>
         <Text style={styles.tdPU}>L{formatMoney(unitPriceNoVAT)}</Text>
@@ -334,6 +337,7 @@ const OrderPDF: React.FC<OrderPDFProps> = ({ order, sellerName = '' }) => {
         <View style={styles.tableArticles}>
           <View style={styles.tableHeader}>
             <Text style={[styles.tableHeaderCell, styles.thCode]}>Código</Text>
+            <Text style={[styles.tableHeaderCell, styles.thSKU]}>SKU</Text>
             <Text style={[styles.tableHeaderCell, styles.thDesc]}>Descripción</Text>
             <Text style={[styles.tableHeaderCell, styles.thCant]}>Cant</Text>
             <Text style={[styles.tableHeaderCell, styles.thPU]}>P/U</Text>
