@@ -96,7 +96,7 @@ export function AppSidebar() {
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">iSync Web</span>
-                <span className="truncate text-xs text-muted-foreground">iSync</span>
+                <span className="truncate text-xs text-muted-foreground">Agrinsa</span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>

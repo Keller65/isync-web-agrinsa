@@ -383,7 +383,8 @@ function ProductCard({ product }: { product: Product }) {
   const tier = product.tiers?.[0]
   const finalPrice = tier ? tier.price : product.price
   const isFletes = product.itemName?.toUpperCase().includes('FLETES')
-  const canEditPrice = isFletes || product.priceListNum !== 11
+  const isGroup120 = product.groupCode === '120'
+  const canEditPrice = isFletes || isGroup120 || product.priceListNum !== 11
 
   const fetchAnalytics = useCallback(async () => {
     if (!token || !selectedCustomer) return
@@ -735,7 +736,7 @@ function ProductCard({ product }: { product: Product }) {
                       </div>
                     </div>
 
-                    {(product.priceListNum === 11 && !isFletes) && (
+                    {(product.priceListNum === 11 && !isFletes && !isGroup120) && (
                       <div>
                         <p className="text-xs font-bold text-muted-foreground uppercase mb-2">Descuento</p>
                         <div className="flex items-center gap-1">
