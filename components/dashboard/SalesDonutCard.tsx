@@ -4,6 +4,7 @@ import { useMemo, useEffect, useState, useRef } from "react"
 import { Doughnut } from "react-chartjs-2"
 import { Chart as ChartJS, ArcElement, Tooltip } from "chart.js"
 import { useAuthStore } from '@/lib/store'
+import { usePathname } from "next/navigation"
 import { SalesDonutTypes } from "@/types/dashboar"
 import axios from "axios"
 
@@ -14,33 +15,40 @@ export default function SalesDonutCard() {
   const [loading, setLoading] = useState(true)
   const [goal, setGoal] = useState(20);
   const { token, salesPersonCode } = useAuthStore()
+  const pathname = usePathname()
+  const prevTokenRef = useRef<string | null>(null)
 
-  // Evitar doble fetch en desarrollo (Strict Mode)
-  const calledRef = useRef(false)
+  const fetchData = async () => {
+    if (!token || !salesPersonCode) return
+    
+    setLoading(true)
+    try {
+      const response = await axios.get(`/api-proxy/api/Kpi/monthly/${salesPersonCode}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }, timeout: 60000
+      })
+      setData(response.data)
+      console.log("KPI de ventas: ", response.data);
+    } catch (error) {
+      console.error("Error fetching donut data:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    if (calledRef.current) return
-    calledRef.current = true
-
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(`/api-proxy/api/Kpi/monthly/${salesPersonCode}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          }, timeout: 60000
-        })
-        setData(response.data)
-        console.log("KPI de ventas: ", response.data);
-      } catch (error) {
-        console.error("Error fetching donut data:", error)
-      } finally {
-        setLoading(false)
+    if (token && salesPersonCode) {
+      if (prevTokenRef.current === null && token) {
+        prevTokenRef.current = token;
+        fetchData();
+      } else if (prevTokenRef.current !== token) {
+        prevTokenRef.current = token;
+        fetchData();
       }
     }
-
-    fetchData()
-  }, [])
+  }, [token, salesPersonCode, pathname])
 
   // Calcular porcentaje
   const percentage = useMemo(() => {

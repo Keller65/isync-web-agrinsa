@@ -2,7 +2,8 @@
 
 import { ArrowDown, ArrowUp } from "lucide-react"
 import { useAuthStore } from '@/lib/store'
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
+import { usePathname } from "next/navigation"
 import axios from "axios"
 
 // Definición de tipos
@@ -24,16 +25,27 @@ interface KpiApiResponse {
 
 export default function KPICardApi() {
   const { salesPersonCode, fullName, token } = useAuthStore()
+  const pathname = usePathname()
+  const prevTokenRef = useRef<string | null>(null)
   const [data, setData] = useState<KpiApiResponse | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchData = async () => {
+    if (token && salesPersonCode) {
+      if (prevTokenRef.current === null && token) {
+        prevTokenRef.current = token;
+        fetchData();
+      } else if (prevTokenRef.current !== token) {
+        prevTokenRef.current = token;
+        fetchData();
+      }
+    }
+
+    async function fetchData() {
       if (!salesPersonCode || !token) return
 
       try {
         setLoading(true)
-        // Usamos el Proxy definido en next.config.ts para evitar CORS
         const response = await axios.get<KpiApiResponse>(
           `/api-proxy/api/Kpi/sales-vs-collections/${salesPersonCode}`,
           {
@@ -49,9 +61,7 @@ export default function KPICardApi() {
         setLoading(false)
       }
     }
-
-    fetchData()
-  }, [salesPersonCode, token])
+  }, [salesPersonCode, token, pathname])
 
   // Estado de carga (Loading skeleton)
   if (loading || !data || !data.ventas) {

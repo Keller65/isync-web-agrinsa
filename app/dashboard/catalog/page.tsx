@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import dynamic from "next/dynamic"
 import { File, Image, Rows, Grid3X3 } from "lucide-react"
 import { MagnifyingGlass } from "@phosphor-icons/react"
@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import axios, { isAxiosError } from "axios"
 import { useAuthStore } from '@/lib/store'
+import { usePathname } from "next/navigation"
 import CatalogPdf from "@/components/CatalogPdf"
 
 const PDFDownloadLink = dynamic(
@@ -37,6 +38,8 @@ export default function CatalogPage() {
   const [hasMore, setHasMore] = useState(true)
 
   const { token } = useAuthStore()
+  const pathname = usePathname()
+  const prevTokenRef = useRef<string | null>(null)
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -106,12 +109,22 @@ export default function CatalogPage() {
   }
 
   useEffect(() => {
-    if (!token) return
-    setAllProducts([])
-    setPage(1)
-    setHasMore(true)
-    fetchProducts(1, debouncedSearch || undefined)
-  }, [token, debouncedSearch])
+    if (token) {
+      if (prevTokenRef.current === null && token) {
+        prevTokenRef.current = token;
+        setAllProducts([])
+        setPage(1)
+        setHasMore(true)
+        fetchProducts(1, debouncedSearch || undefined)
+      } else if (prevTokenRef.current !== token) {
+        prevTokenRef.current = token;
+        setAllProducts([])
+        setPage(1)
+        setHasMore(true)
+        fetchProducts(1, debouncedSearch || undefined)
+      }
+    }
+  }, [token, debouncedSearch, pathname])
 
   const selectedItems = filteredProducts.filter(p =>
     selectedProducts.includes(p.itemCode)

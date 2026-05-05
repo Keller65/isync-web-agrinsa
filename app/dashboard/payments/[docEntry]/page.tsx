@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useParams } from "next/navigation"
+import { useEffect, useState, useRef } from "react"
+import { useParams, usePathname } from "next/navigation"
 import axios from "axios"
 import Link from "next/link"
 import { useAuthStore } from '@/lib/store'
@@ -18,11 +18,23 @@ export default function PaymentPage() {
 
   const { token } = useAuthStore()
   const { docEntry } = useParams()
+  const pathname = usePathname()
+  const prevTokenRef = useRef<string | null>(null)
 
   useEffect(() => {
-    if (!docEntry || !token) return
+    if (token && docEntry) {
+      if (prevTokenRef.current === null && token) {
+        prevTokenRef.current = token;
+        fetchPayment();
+      } else if (prevTokenRef.current !== token) {
+        prevTokenRef.current = token;
+        fetchPayment();
+      }
+    }
 
-    const fetchPayment = async () => {
+    async function fetchPayment() {
+      if (!docEntry || !token) return
+
       setIsLoading(true)
       try {
         const { data } = await axios.get(
@@ -34,9 +46,7 @@ export default function PaymentPage() {
         setIsLoading(false)
       }
     }
-
-    fetchPayment()
-  }, [docEntry, token])
+  }, [docEntry, token, pathname])
 
   if (isLoading) {
     return (

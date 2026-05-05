@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, usePathname } from 'next/navigation';
 import { PDFDownloadLink, pdf } from '@react-pdf/renderer';
 import axios from 'axios';
 import { ArrowLeft, Loader2, Package, User, Calendar, FileText, Download, Edit3, Hash, Printer } from 'lucide-react';
@@ -31,6 +31,7 @@ const PriceDisplay = ({ price, decimalNum }: { price: number; decimalNum: number
 export default function OrderDetailPage() {
   const router = useRouter();
   const params = useParams();
+  const pathname = usePathname();
   const docEntry = params.docEntry as string;
 
   const [orderDetail, setOrderDetail] = useState<OrderDetailType | null>(null);
@@ -79,7 +80,7 @@ export default function OrderDetailPage() {
 
   useEffect(() => {
     fetchOrderDetail();
-  }, [fetchOrderDetail]);
+  }, [fetchOrderDetail, pathname]);
 
   useEffect(() => {
     setIsClient(true);

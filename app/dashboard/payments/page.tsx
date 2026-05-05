@@ -1,8 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import axios from "axios"
 import { useAuthStore } from '@/lib/store'
+import { usePathname } from "next/navigation"
 import { Payment } from '@/types/payments'
 import {
   FileText,
@@ -22,6 +23,8 @@ export default function PaymentsPage() {
   const [isLoading, setIsLoading] = useState(false)
 
   const { token, salesPersonCode } = useAuthStore()
+  const pathname = usePathname()
+  const prevTokenRef = useRef<string | null>(null)
 
   const fetchPayments = async () => {
     if (!token || !salesPersonCode) return
@@ -43,8 +46,16 @@ export default function PaymentsPage() {
   }
 
   useEffect(() => {
-    fetchPayments()
-  }, [token, salesPersonCode])
+    if (token && salesPersonCode) {
+      if (prevTokenRef.current === null && token) {
+        prevTokenRef.current = token;
+        fetchPayments();
+      } else if (prevTokenRef.current !== token) {
+        prevTokenRef.current = token;
+        fetchPayments();
+      }
+    }
+  }, [token, salesPersonCode, pathname])
 
   return (
     <div className="p-8">

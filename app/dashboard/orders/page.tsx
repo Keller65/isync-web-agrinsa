@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import axios from 'axios';
 import { AlertCircle, Loader2, RefreshCw, TrendingUp, Plus, Search, ArrowRight, MapPin, Check } from 'lucide-react';
 import { useAuthStore } from '@/lib/store';
@@ -34,6 +35,7 @@ interface OrderDataType {
 
 export default function OrdersPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const [orderData, setOrderData] = useState<OrderDataType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -57,6 +59,7 @@ export default function OrdersPage() {
   const isLoadingRef = useRef(false);
   const isLastPageRef = useRef(false);
   const isLastCustomerPageRef = useRef(false);
+  const prevTokenRef = useRef<string | null>(null);
   const { salesPersonCode, token, fullName } = useAuthStore();
   const {
     setSelectedCustomer,
@@ -276,9 +279,15 @@ export default function OrdersPage() {
 
   useEffect(() => {
     if (salesPersonCode && token) {
-      fetchOrders(1, true);
+      if (prevTokenRef.current === null && token) {
+        prevTokenRef.current = token;
+        fetchOrders(1, true);
+      } else if (prevTokenRef.current !== token) {
+        prevTokenRef.current = token;
+        fetchOrders(1, true);
+      }
     }
-  }, [salesPersonCode, token, fetchOrders]);
+  }, [salesPersonCode, token, fetchOrders, pathname]);
 
   useEffect(() => {
     if (selectedCustomer) {
