@@ -2,7 +2,6 @@ export interface OrderLineType {
   itemCode: string;
   itemDescription: string;
   itemName: string;
-  suppCatNum?: string;
   barCode: string;
   quantity: number;
   priceAfterVAT?: number;
@@ -13,6 +12,19 @@ export interface OrderLineType {
   taxCode: string;
   stock?: number;
   warehouseCode?: string;
+}
+
+export interface InvoiceType {
+  docEntry: number;
+  docNum: number;
+  numAtCard: string;
+  cardCode: string;
+  cardName: string;
+  docDate: string;
+  docDueDate: string;
+  docTotal: number;
+  balanceDue: number;
+  paidAmount?: number;
 }
 
 export interface OrderDetailType {

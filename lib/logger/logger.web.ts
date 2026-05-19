@@ -89,7 +89,7 @@ export class ISyncWebLogger {
     };
   }
 
-  logQuotation({ endpoint, payload, message = 'Cotización procesada', documentId, isEditing }: {
+  logQuotation({ endpoint, payload, message = 'Oferta procesada', documentId, isEditing }: {
     endpoint: string;
     payload?: unknown;
     message?: string;

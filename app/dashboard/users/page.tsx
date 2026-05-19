@@ -1,7 +1,9 @@
 "use client"
 
-import { useState } from "react"
-import { PencilSimple, Plus } from "@phosphor-icons/react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import axios from "axios"
+import { PencilSimple, Plus, User as UserIcon } from "@phosphor-icons/react"
 import Avvvatars from "avvvatars-react"
 import {
   Dialog,
@@ -13,265 +15,271 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
-import {
-  LayoutDashboard,
-  ShoppingCart,
-  CreditCard,
-  MapPin,
-  MapPinned,
-} from "lucide-react"
-
-type AccessLevel = "none" | "read" | "write" | "full"
-
-interface UserPermissions {
-  analiticas: AccessLevel
-  pedidos: AccessLevel
-  cobros: AccessLevel
-  visitas: AccessLevel
-  ubicaciones: AccessLevel
-}
+import { Input } from "@/components/ui/input"
+import { useSession } from "next-auth/react"
+import { AdminUser } from "@/types/api-types"
 
 interface UserData {
   id: string
   name: string
   email: string
   active: boolean
-  avatarUrl?: string
-  permissions: UserPermissions
+  salesPersonCode: number | null
+  isMasterAdmin: boolean
+  twoFactorEnabled: boolean
 }
 
-const initialUsers: UserData[] = [
-  {
-    id: "1",
-    name: "Juan Perez",
-    email: "juan.perez@example.com",
-    active: true,
-    permissions: {
-      analiticas: "full",
-      pedidos: "write",
-      cobros: "read",
-      visitas: "none",
-      ubicaciones: "read",
-    },
-  },
-  {
-    id: "2",
-    name: "Maria Garcia",
-    email: "maria.garcia@example.com",
-    active: false,
-    permissions: {
-      analiticas: "read",
-      pedidos: "read",
-      cobros: "none",
-      visitas: "none",
-      ubicaciones: "none",
-    },
-  },
-  {
-    id: "3",
-    name: "Carlos Sanchez",
-    email: "carlos.sanchez@example.com",
-    active: true,
-    permissions: {
-      analiticas: "full",
-      pedidos: "full",
-      cobros: "full",
-      visitas: "full",
-      ubicaciones: "full",
-    },
-  },
-]
-
-const permissionConfig: { key: keyof UserPermissions; label: string; icon: React.ElementType }[] = [
-  { key: "analiticas", label: "Analíticas", icon: LayoutDashboard },
-  { key: "pedidos", label: "Pedidos", icon: ShoppingCart },
-  { key: "cobros", label: "Cobros", icon: CreditCard },
-  { key: "visitas", label: "Visitas", icon: MapPin },
-  { key: "ubicaciones", label: "Ubicaciones", icon: MapPinned },
-]
-
-const accessLevelConfig: { value: AccessLevel; label: string }[] = [
-  { value: "none", label: "Sin acceso" },
-  { value: "read", label: "Ver" },
-  { value: "write", label: "Editar" },
-  { value: "full", label: "Completo" },
-]
-
 export default function Page() {
-  const [users, setUsers] = useState<UserData[]>(initialUsers)
-  const [selectedUser, setSelectedUser] = useState<UserData | null>(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const router = useRouter()
+  const { data: session } = useSession()
+  const token = session?.user?.token ?? null
+  const [users, setUsers] = useState<UserData[]>([])
+  const [loading, setLoading] = useState(true)
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [creating, setCreating] = useState(false)
+  const [createForm, setCreateForm] = useState({
+    username: "",
+    email: "",
+    password: "",
+    employeeId: "",
+    salesPersonCode: "",
+    canLoginWeb: true,
+    canLoginApp: true,
+    isMasterAdmin: false,
+  })
+
+  useEffect(() => {
+    if (!token) return
+
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get<AdminUser[]>("/api-proxy/api/isync/auth/admin/users", {
+          params: { page: 1, pageSize: 20 },
+          headers: { Authorization: `Bearer ${token}` },
+        })
+
+        const apiUsers: UserData[] = (response.data ?? []).map((user) => ({
+          id: String(user.userId),
+          name: user.fullName || user.username,
+          email: user.email,
+          active: user.isActive,
+          salesPersonCode: user.salesPersonCode,
+          isMasterAdmin: user.isMasterAdmin,
+          twoFactorEnabled: user.twoFactorEnabled,
+        }))
+
+        setUsers(apiUsers)
+      } catch (err) {
+        console.error("Error fetching users:", err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchUsers()
+  }, [token])
 
   const handleEditClick = (user: UserData) => {
-    setSelectedUser(JSON.parse(JSON.stringify(user)))
-    setIsModalOpen(true)
+    router.push(`/dashboard/users/${user.id}`)
   }
 
-  const handleSavePermissions = () => {
-    if (selectedUser) {
-      setUsers(users.map((user) => (user.id === selectedUser.id ? selectedUser : user)))
-      setIsModalOpen(false)
-      setSelectedUser(null)
+  const handleCreateUser = async () => {
+    if (!token || !createForm.username || !createForm.email || !createForm.password) {
+      return
     }
-  }
 
-  const handleToggleActive = (checked: boolean) => {
-    if (selectedUser) {
-      setSelectedUser({ ...selectedUser, active: checked })
-    }
-  }
-
-  const handlePermissionChange = (key: keyof UserPermissions, value: AccessLevel) => {
-    if (selectedUser) {
-      setSelectedUser({
-        ...selectedUser,
-        permissions: {
-          ...selectedUser.permissions,
-          [key]: value,
+    setCreating(true)
+    try {
+      const response = await axios.post<{ userId: number }>(
+        "/api-proxy/api/isync/auth/admin/users",
+        {
+          username: createForm.username,
+          email: createForm.email,
+          password: createForm.password,
+          employeeId: createForm.employeeId ? Number(createForm.employeeId) : null,
+          salesPersonCode: createForm.salesPersonCode ? Number(createForm.salesPersonCode) : null,
+          canLoginWeb: createForm.canLoginWeb,
+          canLoginApp: createForm.canLoginApp,
+          isMasterAdmin: createForm.isMasterAdmin,
         },
-      })
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+
+      if (response.data?.userId) {
+        const newUser: UserData = {
+          id: String(response.data.userId),
+          name: createForm.username,
+          email: createForm.email,
+          active: true,
+          salesPersonCode: createForm.salesPersonCode ? Number(createForm.salesPersonCode) : null,
+          isMasterAdmin: createForm.isMasterAdmin,
+          twoFactorEnabled: false,
+        }
+        setUsers([newUser, ...users])
+        setIsCreateModalOpen(false)
+        setCreateForm({
+          username: "",
+          email: "",
+          password: "",
+          employeeId: "",
+          salesPersonCode: "",
+          canLoginWeb: true,
+          canLoginApp: true,
+          isMasterAdmin: false,
+        })
+      }
+    } catch (err) {
+      console.error("Error creating user:", err)
+    } finally {
+      setCreating(false)
     }
-  }
-
-  const getAccessConfig = (level: AccessLevel) => {
-    return accessLevelConfig.find((c) => c.value === level) || accessLevelConfig[0]
-  }
-
-  const getPermissionCount = (permissions: UserPermissions) => {
-    return Object.values(permissions).filter((p) => p !== "none").length
   }
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
+    <div className="p-4 max-w-full mx-auto">
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-2xl font-semibold">Usuarios</h1>
           <p className="text-sm text-muted-foreground mt-1">Gestiona el acceso y permisos de tu equipo</p>
         </div>
-        <Button className="gap-2">
+        <Button variant="outline" className="gap-2" onClick={() => setIsCreateModalOpen(true)}>
           <Plus size={18} />
           Nuevo usuario
         </Button>
       </div>
 
-      <div className="grid gap-4">
-        {users.map((user) => (
-          <div
-            key={user.id}
-            className="flex items-center gap-4 p-4 bg-card border rounded-lg hover:bg-accent/5 transition-colors"
-          >
-            <Avvvatars value={user.email} style="shape" size={48} />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <h3 className="font-medium truncate">{user.name}</h3>
-                <span className={`w-2 h-2 rounded-full ${user.active ? "bg-green-500" : "bg-muted-foreground"}`} />
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : users.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+          <UserIcon size={48} className="mb-4 opacity-50" />
+          <p>No hay usuarios registrados</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {users.map((user) => (
+            <div
+              key={user.id}
+              className="flex items-center gap-4 p-4 bg-card border rounded-lg hover:bg-accent/5 transition-colors"
+            >
+              <Avvvatars value={user.email} style="shape" size={48} />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-medium truncate">{user.name}</h3>
+                  <span className={`w-2 h-2 rounded-full ${user.active ? "bg-green-500" : "bg-muted-foreground"}`} />
+                </div>
+                <p className="text-sm text-muted-foreground truncate">{user.email}</p>
               </div>
-              <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+              <div className="hidden md:flex items-center gap-4 text-sm">
+                <div className="text-center">
+                  <p className="text-muted-foreground text-xs uppercase tracking-wider">Admin</p>
+                  <p className={`font-medium ${user.isMasterAdmin ? "text-blue-600" : "text-muted-foreground"}`}>
+                    {user.isMasterAdmin ? "Sí" : "No"}
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className="text-muted-foreground text-xs uppercase tracking-wider">2FA</p>
+                  <p className={`font-medium ${user.twoFactorEnabled ? "text-green-600" : "text-muted-foreground"}`}>
+                    {user.twoFactorEnabled ? "Activo" : "Inactivo"}
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className="text-muted-foreground text-xs uppercase tracking-wider">Estado</p>
+                  <p className={`font-medium ${user.active ? "text-green-600" : "text-muted-foreground"}`}>
+                    {user.active ? "Activo" : "Inactivo"}
+                  </p>
+                </div>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => handleEditClick(user)}>
+                <PencilSimple size={20} />
+              </Button>
             </div>
-            <div className="hidden md:flex items-center gap-6 text-sm">
-              <div className="text-center">
-                <p className="text-muted-foreground text-xs uppercase tracking-wider">Permisos</p>
-                <p className="font-medium">{getPermissionCount(user.permissions)} / 5</p>
-              </div>
-              <div className="text-center">
-                <p className="text-muted-foreground text-xs uppercase tracking-wider">Estado</p>
-                <p className={`font-medium ${user.active ? "text-green-600" : "text-muted-foreground"}`}>
-                  {user.active ? "Activo" : "Inactivo"}
-                </p>
-              </div>
-            </div>
-            <Button variant="ghost" size="icon" onClick={() => handleEditClick(user)}>
-              <PencilSimple size={20} />
-            </Button>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader className="pb-4">
-            <DialogTitle>Permisos de acceso</DialogTitle>
+      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Crear nuevo usuario</DialogTitle>
             <DialogDescription>
-              Configura qué puede ver y hacer cada usuario en el sistema
+              Ingresa los datos del nuevo usuario
             </DialogDescription>
           </DialogHeader>
 
-          {selectedUser && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
-                <div className="flex items-center gap-4">
-                  <Avvvatars value={selectedUser.email} style="shape" size={48} />
-                  <div>
-                    <h3 className="font-medium">{selectedUser.name}</h3>
-                    <p className="text-sm text-muted-foreground">{selectedUser.email}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className={`text-sm font-medium ${selectedUser.active ? "text-green-600" : "text-muted-foreground"}`}>
-                    {selectedUser.active ? "Activo" : "Inactivo"}
-                  </span>
-                  <Switch
-                    id="user-status"
-                    checked={selectedUser.active}
-                    onCheckedChange={handleToggleActive}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-3">
-                {permissionConfig.map(({ key, label, icon: Icon }) => {
-                  const currentLevel = selectedUser.permissions[key]
-                  const currentConfig = getAccessConfig(currentLevel)
-                  
-                  return (
-                    <div
-                      key={key}
-                      className="group relative flex items-center justify-between p-4 border rounded-xl hover:border-primary/50 hover:bg-muted/30 transition-all"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className={`p-2.5 rounded-lg ${currentLevel !== 'none' ? 'bg-primary/10' : 'bg-muted'}`}>
-                          <Icon size={20} className={currentLevel !== 'none' ? 'text-primary' : 'text-muted-foreground'} />
-                        </div>
-                        <span className="font-medium">{label}</span>
-                      </div>
-                      
-                      <div className="flex gap-1.5">
-                        {accessLevelConfig.map((level) => {
-                          const isSelected = currentLevel === level.value
-                          return (
-                            <button
-                              key={level.value}
-                              onClick={() => handlePermissionChange(key, level.value)}
-                              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                                isSelected
-                                  ? 'bg-primary text-white shadow-sm'
-                                  : 'text-muted-foreground hover:bg-muted'
-                              }`}
-                            >
-                              {level.label}
-                            </button>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-
-              <div className="flex items-center justify-between pt-2 border-t">
-                <p className="text-sm text-muted-foreground">
-                  <span className="font-medium text-foreground">{getPermissionCount(selectedUser.permissions)}</span> de {permissionConfig.length} módulos activos
-                </p>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Nombre de usuario</label>
+              <Input
+                value={createForm.username}
+                onChange={(e) => setCreateForm({ ...createForm, username: e.target.value })}
+                placeholder="Ingrese el nombre del usuario"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Correo electrónico</label>
+              <Input
+                type="email"
+                value={createForm.email}
+                onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
+                placeholder="Ingrese el Correo"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Contraseña</label>
+              <Input
+                type="password"
+                value={createForm.password}
+                onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
+                placeholder="••••••••"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Sales Person Code</label>
+                <Input
+                  type="number"
+                  value={createForm.salesPersonCode}
+                  onChange={(e) => setCreateForm({ ...createForm, salesPersonCode: e.target.value })}
+                  placeholder="30"
+                />
               </div>
             </div>
-          )}
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">Permitir login web</label>
+              <Switch
+                checked={createForm.canLoginWeb}
+                onCheckedChange={(checked) => setCreateForm({ ...createForm, canLoginWeb: checked })}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">Permitir login app</label>
+              <Switch
+                checked={createForm.canLoginApp}
+                onCheckedChange={(checked) => setCreateForm({ ...createForm, canLoginApp: checked })}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">Es administrador maestro</label>
+              <Switch
+                checked={createForm.isMasterAdmin}
+                onCheckedChange={(checked) => setCreateForm({ ...createForm, isMasterAdmin: checked })}
+              />
+            </div>
+          </div>
 
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setIsModalOpen(false)} className="flex-1">
+            <Button variant="outline" onClick={() => setIsCreateModalOpen(false)} className="flex-1">
               Cancelar
             </Button>
-            <Button onClick={handleSavePermissions} className="flex-1">
-              Guardar cambios
+            <Button
+              onClick={handleCreateUser}
+              disabled={creating || !createForm.username || !createForm.email || !createForm.password}
+              className="flex-1"
+            >
+              {creating ? "Creando..." : "Crear usuario"}
             </Button>
           </DialogFooter>
         </DialogContent>

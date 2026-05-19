@@ -13,7 +13,7 @@ export default function LoginPage() {
           <div className="size-9">
             <Image
               alt="logo isync web cloud"
-              src="/assets/iSync.png"
+              src="/assets/iSync.svg"
               height={80}
               width={80}
               className="object-contain"
@@ -34,21 +34,22 @@ export default function LoginPage() {
         </div>
 
         {/* Lado Derecho: Formulario */}
-        <div className="w-full lg:w-[60vw] flex flex-col justify-center px-6 py-10 sm:px-16 sm:py-12 lg:p-16">
+        <div className="w-full bg-brand-primary md:bg-white lg:w-[60vw] flex flex-col justify-end md:justify-center p-0 lg:p-16">
 
           {/* Logo visible solo en mobile/tablet */}
-          <div className="flex items-center gap-2.5 mb-8 lg:hidden">
+          <div className="flex items-center flex-1 justify-center gap-2.5 md:mb-8 lg:hidden">
             <Image
               alt="logo isync"
-              src="/assets/iSync.png"
+              src="/assets/iSync.svg"
+              priority
               height={36}
               width={36}
-              className="object-contain"
+              className="object-contain size-50 md:size-9"
             />
-            <span className="text-base font-bold text-gray-800">iSync</span>
+            <span className="text-base font-bold text-gray-800 hidden md:block">iSync</span>
           </div>
 
-          <div className="w-full max-w-sm mx-auto lg:max-w-none">
+          <div className="w-full max-w-full p-4 mx-auto lg:max-w-none bg-white h-[60vh] md:h-auto rounded-t-2xl">
             <LoginForm />
           </div>
         </div>

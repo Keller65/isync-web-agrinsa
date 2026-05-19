@@ -165,3 +165,26 @@
   scrollbar-width: thin;
   scrollbar-color: #c1c1c1 transparent;
 }
+
+.editable-cell {
+  background-color: hsl(var(--primary) / 0.04);
+}
+
+.ag-cell-focus.editable-cell {
+  outline: 2px solid hsl(var(--primary)) !important;
+  outline-offset: -2px;
+  background-color: hsl(var(--primary) / 0.10) !important;
+}
+
+.ag-cell-focus {
+  outline: 2px solid hsl(var(--ring)) !important;
+  outline-offset: -2px;
+}
+
+.active-col {
+  background-color: rgba(59, 130, 246, 0.08) !important;
+}
+
+.ag-cell-focus.active-col {
+  background-color: rgba(59, 130, 246, 0.18) !important;
+}

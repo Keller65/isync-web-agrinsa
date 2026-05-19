@@ -5,10 +5,24 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
 import Avvvatars from "avvvatars-react"
-import { Cardholder, ChartLineUp, GearSix, ShoppingCart, CaretUpDown, SignOut, Users, MapTrifoldIcon, Calendar, MapPin, Path, List, Clock, Books } from "@phosphor-icons/react"
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarGroup, SidebarGroupLabel, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, useSidebar } from "@/components/ui/sidebar"
+import { Cardholder, ChartLineUp, ShoppingCart, CaretUpDown, SignOut, Path, Books, FileCsvIcon, GpsFixIcon, ClockCounterClockwiseIcon, UsersIcon, GearSixIcon } from "@phosphor-icons/react"
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarGroup, SidebarGroupLabel, useSidebar } from "@/components/ui/sidebar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger, } from "@/components/ui/collapsible"
+import type { MenuItem } from "@/types/next-auth"
+
+const MENU_CODE_MAP: Record<string, string> = {
+  "/dashboard": "ANALYTICS",
+  "/dashboard/payments": "INCOMING_PAYMENTS",
+  "/dashboard/catalog": "PRODUCT_CATALOG",
+  "/dashboard/orders": "SALES_QUOTATIONS",
+  "/dashboard/bulk-upload": "MASS_QUOTATIONS",
+  "/dashboard/maps/history": "GPS_HISTORY",
+  "/dashboard/maps/real-time": "GPS_REALTIME",
+  "/dashboard/users": "USERS",
+  "/dashboard/settings": "SETTINGS",
+  "/dashboard/wms": "WMS",
+}
 
 const items = [
   {
@@ -20,59 +34,83 @@ const items = [
         icon: ChartLineUp,
       },
       {
-        title: "Cotizaciones",
-        url: "/dashboard/orders",
-        icon: ShoppingCart,
+        title: "Pago Recibido",
+        url: "/dashboard/payments",
+        icon: Cardholder,
       },
-      // {
-      //   title: "Cobros",
-      //   url: "/dashboard/payments",
-      //   icon: Cardholder,
-      // },
       {
         title: "Catálogo",
         url: "/dashboard/catalog",
         icon: Books,
       },
+
+      {
+        title: "WMS Picking",
+        url: "/dashboard/catalog",
+        icon: Books,
+      },
     ]
   },
-  // {
-  //   title: "Visitas",
-  //   url: "/dashboard/visitas",
-  //   icon: MapPin,
-  //   subItems: [
-  //     { title: "General", url: "/dashboard/visitas", icon: List },
-  //     { title: "Mapas", url: "/dashboard/visitas/maps", icon: MapTrifoldIcon },
-  //     { title: "Registro", url: "/dashboard/visitas/visits", icon: Clock },
-  //     { title: "Calendario", url: "/dashboard/visitas/calendar", icon: Calendar },
-  //   ]
-  // },
-  // {
-  //   title: "Utilidades",
-  //   items: [
-  //     {
-  //       title: "Usuarios",
-  //       url: "/dashboard/users",
-  //       icon: Users,
-  //     },
-  //   ]
-  // },
+  {
+    title: "Oferta",
+    items: [
+      { title: "Oferta de Venta", url: "/dashboard/orders", icon: ShoppingCart },
+      { title: "Oferta Masiva", url: "/dashboard/bulk-upload", icon: FileCsvIcon },
+    ]
+  },
+
+  {
+    title: "Ubicaciones",
+    items: [
+      { title: "Historial GPS", url: "/dashboard/maps/history", icon: ClockCounterClockwiseIcon },
+      { title: "GPS en Tiempo Real", url: "/dashboard/maps/real-time", icon: GpsFixIcon },
+    ]
+  },
+  {
+    title: "Utilidades",
+    items: [
+      {
+        title: "Usuarios",
+        url: "/dashboard/users",
+        icon: UsersIcon,
+      },
+    ]
+  },
   {
     title: "Cuenta",
     items: [
       {
         title: "Ajustes",
         url: "/dashboard/settings",
-        icon: GearSix,
+        icon: GearSixIcon,
       },
     ]
   }
 ]
 
+function canViewMenu(url: string, menus: MenuItem[] | undefined, isMasterAdmin: boolean): boolean {
+  if (isMasterAdmin) return true
+  if (!menus || menus.length === 0) return true
+
+  const menuCode = MENU_CODE_MAP[url]
+  if (!menuCode) return true
+
+  const menu = menus.find(m => m.menuCode === menuCode)
+  return menu?.canView ?? true
+}
+
 export function AppSidebar() {
   const { data: session } = useSession()
   const router = useRouter()
   const { setOpenMobile, isMobile } = useSidebar()
+
+  const menus = session?.user?.menus
+  const isMasterAdmin = session?.user?.isMasterAdmin ?? false
+
+  const filteredItems = items.map(group => ({
+    ...group,
+    items: group.items?.filter(item => canViewMenu(item.url, menus, isMasterAdmin)) ?? []
+  })).filter(group => group.items.length > 0)
 
   const handleSignOut = async () => {
     await signOut({ redirect: false })
@@ -96,7 +134,7 @@ export function AppSidebar() {
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">iSync Web</span>
-                <span className="truncate text-xs text-muted-foreground">Agrinsa</span>
+                <span className="truncate text-xs text-muted-foreground">iSync</span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -104,7 +142,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {items.map((group) => (
+        {filteredItems.map((group) => (
           <SidebarGroup key={group.title}>
             <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
             <SidebarMenu>
@@ -148,7 +186,13 @@ export function AppSidebar() {
                   <Avvvatars value={session?.user?.email ?? ''} style="shape" size={32} />
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-semibold">{session?.user?.fullName}</span>
-                    <span className="truncate text-xs text-muted-foreground">Vendedor iSync</span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      {session?.user?.isMasterAdmin == null
+                        ? "Cargando..."
+                        : session.user.isMasterAdmin
+                          ? "Usuario Administrador"
+                          : "Vendedor iSync"}
+                    </span>
                   </div>
                   <CaretUpDown size={16} className="ml-auto" />
                 </SidebarMenuButton>

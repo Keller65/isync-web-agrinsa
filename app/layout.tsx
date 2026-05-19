@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/sonner"
-import "../app/globals.css";
+import "./globals.css";
 import AuthProvider from "@/components/auth/auth-provider"
-import SessionSync from "@/components/auth/session-sync"
+import { TooltipProvider } from "@/components/ui/tooltip"
+import SessionGate from "@/components/auth/SessionGate";
 
 export const metadata: Metadata = {
   title: "iSync Web - Todo Sincronizado",
-  description: "iSync Web es una aplicacin de tareas que se sincroniza con iSync, permitiendo gestionar tus cotizaciones de manera eficiente y sin complicaciones.",
+  description: "iSync Web es una aplicacin de tareas que se sincroniza con iSync, permitiendo gestionar tus Oferta de manera eficiente y sin complicaciones.",
 };
 
 export default function RootLayout({
@@ -19,8 +20,11 @@ export default function RootLayout({
       <body className="antialiased">
 
         <AuthProvider>
-          <SessionSync />
-          <main>{children}</main>
+          <TooltipProvider>
+            <SessionGate>
+              <main>{children}</main>
+            </SessionGate>
+          </TooltipProvider>
         </AuthProvider>
         <Toaster theme="light" richColors closeButton position="top-right" />
       </body>

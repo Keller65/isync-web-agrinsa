@@ -16,26 +16,27 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Credentials({
       name: "Credenciales",
       credentials: {
-        employeeCode: { label: "Código de Vendedor", type: "number" },
+        username: { label: "Código de Vendedor", type: "number" },
         password: { label: "Contraseña", type: "password" },
       },
 
       authorize: async (credentials) => {
-        if (!credentials?.employeeCode || !credentials?.password) {
+        if (!credentials?.username || !credentials?.password) {
           return null
         }
 
         try {
           const payload: LoginRequest = {
-            employeeCode: Number(credentials.employeeCode),
+            username: credentials.username as string,
             password: credentials.password as string,
+            appType: 'WEB'
           }
 
           const apiHost = process.env.NEXT_PUBLIC_API_HOST
           if (!apiHost) return null
 
           const response = await axios.post<LoginResponse>(
-            `${apiHost}/auth/employee`,
+            `${apiHost}/api/isync/auth/login`,
             payload
           )
 
@@ -43,16 +44,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             const apiData = response.data
 
             return {
-              id: String(apiData.salesPersonCode),
+              id: String(apiData.userId),
+              userId: Number(apiData.userId),
+              requiresTwoFactorSetup: apiData.requiresTwoFactorSetup,
               salesPersonCode: apiData.salesPersonCode,
               token: apiData.token,
               fullName: apiData.fullName,
               u_WhsCode: apiData.u_WhsCode,
               u_SerieCot: apiData.u_SerieCot,
+              qrCodeBase64: apiData.qrCodeBase64 ?? null,
+              manualKey: apiData.manualKey ?? null,
               email: `${apiData.salesPersonCode}@isync.local`,
+              isMasterAdmin: apiData.isMasterAdmin ?? false,
+              menus: apiData.menus ?? [],
             }
           }
-        } catch (error) {
+        } catch (error: unknown) {
+          const err = error as { response?: { status?: number; data?: unknown }; message?: string }
+          console.error("[auth] Login failed:", err.response?.status, err.response?.data ?? err.message)
           return null
         }
 
@@ -66,14 +75,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
 
   callbacks: {
-    async jwt({ token, user }) {
-      // Solo en login
+    async jwt({ token, user, trigger, session: sessionData }) {
       if (user) {
+        token.userId = user.userId
         token.salesPersonCode = user.salesPersonCode
         token.token = user.token
         token.fullName = user.fullName
         token.u_WhsCode = user.u_WhsCode
         token.u_SerieCot = user.u_SerieCot
+        token.requiresTwoFactorSetup = user.requiresTwoFactorSetup
+        token.qrCodeBase64 = user.qrCodeBase64
+        token.manualKey = user.manualKey
+        token.isMasterAdmin = user.isMasterAdmin
+        token.menus = user.menus
+      }
+
+      if (trigger === "update" && sessionData) {
+        Object.assign(token, sessionData)
       }
 
       return token
@@ -81,12 +99,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
     async session({ session, token }) {
       if (session.user) {
+        session.user.userId = token.userId
         session.user.salesPersonCode = token.salesPersonCode
         session.user.token = token.token
         session.user.fullName = token.fullName
         session.user.name = token.fullName
         session.user.u_WhsCode = token.u_WhsCode
         session.user.u_SerieCot = token.u_SerieCot
+        session.user.requiresTwoFactorSetup = token.requiresTwoFactorSetup
+        session.user.qrCodeBase64 = token.qrCodeBase64
+        session.user.manualKey = token.manualKey
+        session.user.isMasterAdmin = token.isMasterAdmin
+        session.user.menus = token.menus
       }
 
       return session
