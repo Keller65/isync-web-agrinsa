@@ -81,7 +81,7 @@ export default function LoginForm() {
             Código de Empleado
           </label>
           <Input
-            className="w-full h-13 px-4 py-3 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-brand focus:border-transparent outline-none transition-all bg-gray-50 hover:bg-white"
+            className="w-full h-13 px-4 py-3 border dark:text-black border-gray-200 rounded-2xl focus:ring-2 focus:ring-brand focus:border-transparent outline-none transition-all bg-gray-50 hover:bg-white"
             id="username"
             type="text"
             value={username}
@@ -102,7 +102,7 @@ export default function LoginForm() {
           </div>
           <div className="relative">
             <Input
-              className="w-full h-13 px-4 py-3 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-brand focus:border-transparent outline-none transition-all bg-gray-50 hover:bg-white"
+              className="w-full dark:text-black h-13 px-4 py-3 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-brand focus:border-transparent outline-none transition-all bg-gray-50 hover:bg-white"
               id="password"
               type={showPassword ? "text" : "password"}
               value={password}
