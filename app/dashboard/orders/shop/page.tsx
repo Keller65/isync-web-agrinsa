@@ -17,7 +17,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Button } from '@/components/ui/button'
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
 import { Input } from '@/components/ui/input'
-import { useAuthStore } from '@/lib/store'
 import { useCustomerStore } from '@/lib/store/store.customer'
 import { useCartStore } from '@/lib/store/store.cart'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -30,6 +29,7 @@ import { Popover, PopoverTrigger, PopoverContent, PopoverHeader, PopoverTitle, P
 import { Badge } from '@/components/ui/badge'
 import { useSettingsStore } from '@/lib/store/store.general'
 import { logClient } from '@/lib/logger/logger.client'
+import { useSession } from 'next-auth/react'
 
 interface SubCategory {
   name: string
@@ -63,7 +63,9 @@ interface ItemAnalytics {
 }
 
 function ProductList({ endpoint, groupCode = 0, filters }: { endpoint: string, groupCode?: string | number, filters?: ProductFilters }) {
-  const { token, fullName } = useAuthStore()
+  const { data: session } = useSession()
+  const token = session?.user.token
+  const fullName = session?.user.fullName
   const { selectedCustomer } = useCustomerStore()
   const [products, setProducts] = useState<Product[]>([])
   const [page, setPage] = useState(1)
@@ -207,7 +209,9 @@ function ProductList({ endpoint, groupCode = 0, filters }: { endpoint: string, g
 }
 
 function SearchedProducts({ searchTerm, filters }: { searchTerm: string, filters?: ProductFilters }) {
-  const { token, fullName } = useAuthStore()
+  const { data: session } = useSession()
+  const token = session?.user.token
+  const fullName = session?.user.fullName
   const { selectedCustomer } = useCustomerStore()
   const [products, setProducts] = useState<Product[]>([])
   const [page, setPage] = useState(1)
@@ -365,7 +369,9 @@ function CategoryProducts({ groupCode, filters }: { groupCode: string, filters?:
 function ProductCard({ product }: { product: Product }) {
   const { addProduct, updateQuantity, productsInCart } = useCartStore()
   const { selectedCustomer } = useCustomerStore()
-  const { token, fullName } = useAuthStore()
+  const { data: session } = useSession()
+  const token = session?.user.token
+  const fullName = session?.user.fullName
   const [quantity, setQuantity] = useState(1)
   const [open, setOpen] = useState(false)
   const [analyticsData, setAnalyticsData] = useState<ItemAnalytics[]>([])
@@ -990,7 +996,9 @@ function ProductCard({ product }: { product: Product }) {
 }
 
 export default function Page() {
-  const { token, fullName } = useAuthStore()
+  const { data: session } = useSession()
+  const token = session?.user.token
+  const fullName = session?.user.fullName
   const [categories, setCategories] = useState<Category[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')

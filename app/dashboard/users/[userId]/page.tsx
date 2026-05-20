@@ -214,64 +214,57 @@ export default function EditUserPage() {
   }
 
   return (
-    <div className="flex flex-col p-4 max-w-full mx-auto gap-4">
+    <div className="flex flex-col p-4 max-w-full mx-auto gap-4 dark:bg-dark-page">
+      {/* Header */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => router.back()}>
+        <Button variant="ghost" size="icon" onClick={() => router.back()}
+          className="text-gray-500 dark:text-dark-text-muted hover:bg-gray-100 dark:hover:bg-dark-raised"
+        >
           <ArrowLeft size={20} />
         </Button>
         <div>
-          <h1 className="text-2xl font-semibold">Editar usuario</h1>
-          <p className="text-sm text-muted-foreground mt-1">Configura los datos y permisos del usuario</p>
+          <h1 className="text-2xl font-semibold dark:text-dark-text-primary">Editar usuario</h1>
+          <p className="text-sm text-gray-500 dark:text-dark-text-muted mt-1">
+            Configura los datos y permisos del usuario
+          </p>
         </div>
       </div>
 
       <div className="flex flex-col md:flex-row gap-4">
-        <section className="bg-card flex-1 border rounded-xl p-6 relative flex flex-col gap-4">
+        {/* Datos del usuario */}
+        <section className="bg-white dark:bg-dark-card flex-1 border border-gray-200 dark:border-white/[0.07] rounded-xl p-6 relative flex flex-col gap-4">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <UserIcon size={20} className="text-primary" />
+            <div className="p-2 bg-brand-primary/10 dark:bg-dark-raised rounded-lg">
+              <UserIcon size={20} className="text-brand-primary dark:text-dark-text-secondary" />
             </div>
-            <h2 className="text-lg font-semibold">Datos del usuario</h2>
+            <h2 className="text-lg font-semibold dark:text-dark-text-primary">Datos del usuario</h2>
           </div>
+
           <div className="flex items-center gap-6 mb-6">
             <Avvvatars value={formData.email} style="shape" size={64} />
             <div>
-              <p className="font-medium">{formData.fullName || formData.username}</p>
-              <p className="text-sm text-muted-foreground">{formData.email}</p>
+              <p className="font-medium dark:text-dark-text-primary">{formData.fullName || formData.username}</p>
+              <p className="text-sm text-gray-500 dark:text-dark-text-muted">{formData.email}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Nombre de usuario</label>
-              <Input
-                value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Nombre completo</label>
-              <Input
-                value={formData.fullName}
-                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Correo electrónico</label>
-              <Input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Sales Person Code</label>
-              <Input
-                type="number"
-                value={formData.salesPersonCode}
-                onChange={(e) => setFormData({ ...formData, salesPersonCode: e.target.value })}
-              />
-            </div>
+            {[
+              { label: "Nombre de usuario", key: "username", type: "text" },
+              { label: "Nombre completo", key: "fullName", type: "text" },
+              { label: "Correo electrónico", key: "email", type: "email" },
+              { label: "Sales Person Code", key: "salesPersonCode", type: "number" },
+            ].map(({ label, key, type }) => (
+              <div key={key} className="space-y-2">
+                <label className="text-sm font-medium dark:text-dark-text-secondary">{label}</label>
+                <Input
+                  type={type}
+                  value={formData[key as keyof typeof formData] as string}
+                  onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+                  className="dark:bg-dark-raised dark:border-white/[0.07] dark:text-dark-text-primary dark:placeholder:text-dark-text-disabled"
+                />
+              </div>
+            ))}
           </div>
 
           <section className="flex items-center justify-end w-full">
@@ -282,87 +275,61 @@ export default function EditUserPage() {
           </section>
         </section>
 
+        {/* Columna derecha */}
         <section className="flex-1">
           <div className="space-y-4">
 
-            <div className="bg-card border rounded-xl p-6">
+            {/* Opciones adicionales */}
+            <div className="bg-white dark:bg-dark-card border border-gray-200 dark:border-white/[0.07] rounded-xl p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Shield size={20} className="text-primary" />
+                <div className="p-2 bg-brand-primary/10 dark:bg-dark-raised rounded-lg">
+                  <Shield size={20} className="text-brand-primary dark:text-dark-text-secondary" />
                 </div>
-                <h2 className="text-lg font-semibold">Opciones adicionales</h2>
+                <h2 className="text-lg font-semibold dark:text-dark-text-primary">Opciones adicionales</h2>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-center justify-between rounded-lg hover:bg-muted/50 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-muted rounded-lg">
-                      <UserIcon size={18} className="text-muted-foreground" />
+                {[
+                  { icon: UserIcon, label: "Permitir login web", key: "canLoginWeb" },
+                  { icon: UserIcon, label: "Permitir login app", key: "canLoginApp" },
+                  { icon: ShieldIcon, label: "Es administrador maestro", key: "isMasterAdmin" },
+                  { icon: UserIcon, label: "Usuario activo", key: "isActive" },
+                ].map(({ icon: Icon, label, key }) => (
+                  <div
+                    key={key}
+                    className="flex items-center justify-between rounded-lg hover:bg-gray-50 dark:hover:bg-dark-raised transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-gray-100 dark:bg-dark-raised rounded-lg">
+                        <Icon size={18} className="text-gray-500 dark:text-dark-text-muted" />
+                      </div>
+                      <label className="text-sm font-medium dark:text-dark-text-secondary">{label}</label>
                     </div>
-                    <label className="text-sm font-medium">Permitir login web</label>
+                    <Switch
+                      className="cursor-pointer"
+                      checked={formData[key as keyof typeof formData] as boolean}
+                      onCheckedChange={(checked) => setFormData({ ...formData, [key]: checked })}
+                    />
                   </div>
-                  <Switch
-                    className="cursor-pointer"
-                    checked={formData.canLoginWeb}
-                    onCheckedChange={(checked) => setFormData({ ...formData, canLoginWeb: checked })}
-                  />
-                </div>
-                <div className="flex items-center justify-between rounded-lg hover:bg-muted/50 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-muted rounded-lg">
-                      <UserIcon size={18} className="text-muted-foreground" />
-                    </div>
-                    <label className="text-sm font-medium">Permitir login app</label>
-                  </div>
-                  <Switch
-                    className="cursor-pointer"
-                    checked={formData.canLoginApp}
-                    onCheckedChange={(checked) => setFormData({ ...formData, canLoginApp: checked })}
-                  />
-                </div>
-                <div className="flex items-center justify-between rounded-lg hover:bg-muted/50 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-muted rounded-lg">
-                      <ShieldIcon size={18} className="text-muted-foreground" />
-                    </div>
-                    <label className="text-sm font-medium">Es administrador maestro</label>
-                  </div>
-                  <Switch
-                    className="cursor-pointer"
-                    checked={formData.isMasterAdmin}
-                    onCheckedChange={(checked) => setFormData({ ...formData, isMasterAdmin: checked })}
-                  />
-                </div>
-                <div className="flex items-center justify-between rounded-lg hover:bg-muted/50 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-muted rounded-lg">
-                      <UserIcon size={18} className="text-muted-foreground" />
-                    </div>
-                    <label className="text-sm font-medium">Usuario activo</label>
-                  </div>
-                  <Switch
-                    className="cursor-pointer"
-                    checked={formData.isActive}
-                    onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
-                  />
-                </div>
+                ))}
               </div>
             </div>
 
-            <div className="pt-4 border-t space-y-3 bg-card border rounded-xl p-6">
+            {/* Contraseña */}
+            <div className="bg-white dark:bg-dark-card border border-gray-200 dark:border-white/[0.07] rounded-xl p-6 space-y-3">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Nueva Contraseña</label>
+                <label className="text-sm font-medium dark:text-dark-text-secondary">Nueva Contraseña</label>
                 <div className="relative">
                   <Input
                     type={showPassword ? "text" : "password"}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="Ingresa la Nueva Contraseña"
-                    className="pr-9"
+                    className="pr-9 dark:bg-dark-raised dark:border-white/[0.07] dark:text-dark-text-primary dark:placeholder:text-dark-text-disabled"
                   />
                   <div
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-2 flex items-center cursor-pointer"
+                    className="absolute inset-y-0 right-2 flex items-center cursor-pointer text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text-secondary"
                   >
                     {showPassword ? <EyeIcon size={16} /> : <EyeSlashIcon size={16} />}
                   </div>
@@ -375,9 +342,11 @@ export default function EditUserPage() {
                   id="resetTwoFactor"
                   checked={resetTwoFactor}
                   onChange={(e) => setResetTwoFactor(e.target.checked)}
-                  className="rounded"
+                  className="rounded accent-brand-primary"
                 />
-                <label htmlFor="resetTwoFactor" className="text-sm">Resetear 2FA al cambiar contraseña</label>
+                <label htmlFor="resetTwoFactor" className="text-sm dark:text-dark-text-secondary">
+                  Resetear 2FA al cambiar contraseña
+                </label>
               </div>
 
               <section className="flex flex-row gap-2">
@@ -385,7 +354,7 @@ export default function EditUserPage() {
                   variant="outline"
                   onClick={handleResetPassword}
                   disabled={resettingPassword || !newPassword}
-                  className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                  className="text-blue-600 border-blue-200 hover:bg-blue-50 dark:text-dark-text-secondary dark:border-white/[0.07] dark:hover:bg-dark-raised"
                 >
                   {resettingPassword ? "Cambiando..." : "Cambiar Contraseña"}
                 </Button>
@@ -393,30 +362,32 @@ export default function EditUserPage() {
                   variant="outline"
                   onClick={handleReset2FA}
                   disabled={resetting2FA}
-                  className="text-orange-600 border-orange-200 hover:bg-orange-50"
+                  className="text-orange-600 border-orange-200 hover:bg-orange-50 dark:text-dark-text-secondary dark:border-white/[0.07] dark:hover:bg-dark-raised"
                 >
                   {resetting2FA ? "Resetando..." : "Resetear 2FA"}
                 </Button>
               </section>
             </div>
+
           </div>
         </section>
       </div>
 
-      <section className="bg-card border rounded-xl p-6 flex flex-col gap-4">
+      {/* Permisos de menú */}
+      <section className="bg-white dark:bg-dark-card border border-gray-200 dark:border-white/[0.07] rounded-xl p-6 flex flex-col gap-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Shield size={20} className="text-primary" />
+            <div className="p-2 bg-brand-primary/10 dark:bg-dark-raised rounded-lg">
+              <Shield size={20} className="text-brand-primary dark:text-dark-text-secondary" />
             </div>
-            <h2 className="text-lg font-semibold">Permisos de menú</h2>
+            <h2 className="text-lg font-semibold dark:text-dark-text-primary">Permisos de menú</h2>
           </div>
-          <span className="text-xs text-muted-foreground bg-muted px-3 py-1 rounded-full border">
+          <span className="text-xs text-gray-500 dark:text-dark-text-muted bg-gray-100 dark:bg-dark-raised px-3 py-1 rounded-full border border-gray-200 dark:border-white/[0.07]">
             {menus.filter(m => m.canView).length} activos · {menus.length} total
           </span>
         </div>
 
-        {/* Search + filters */}
+        {/* Filtros */}
         <div className="flex flex-col sm:flex-row gap-3 mb-4">
           <div className="flex gap-2">
             {(["all", "active", "inactive"] as const).map((f) => (
@@ -424,8 +395,8 @@ export default function EditUserPage() {
                 key={f}
                 onClick={() => setMenuFilter(f)}
                 className={`text-xs cursor-pointer px-3 py-1.5 rounded-full border transition-colors ${menuFilter === f
-                  ? "bg-primary/10 border-primary/30 text-primary font-medium"
-                  : "border-transparent text-muted-foreground hover:bg-muted"
+                  ? "bg-brand-primary/10 border-brand-primary/30 text-brand-primary dark:bg-dark-raised dark:border-white/12 dark:text-dark-text-primary font-medium"
+                  : "border-transparent text-gray-400 dark:text-dark-text-muted hover:bg-gray-100 dark:hover:bg-dark-raised"
                   }`}
               >
                 {f === "all" ? "Todos" : f === "active" ? "Activos" : "Inactivos"}
@@ -434,7 +405,7 @@ export default function EditUserPage() {
           </div>
         </div>
 
-        {/* Grid */}
+        {/* Grid de permisos */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {menus
             .filter((m) => m.menuName.toLowerCase().includes(menuSearch.toLowerCase()))
@@ -445,18 +416,23 @@ export default function EditUserPage() {
             .map((menu) => (
               <div
                 key={menu.menuCode}
-                className={`flex items-center justify-between px-3 py-2.5 rounded-lg border transition-colors}`}
+                className={`flex items-center justify-between px-3 py-2.5 rounded-lg border transition-colors ${menu.canView
+                  ? "border-brand-primary/20 bg-brand-primary/5 dark:border-white/12 dark:bg-dark-raised"
+                  : "border-gray-200 dark:border-white/[0.07] hover:bg-gray-50 dark:hover:bg-dark-raised"
+                  }`}
               >
-                <section className="flex gap-2 items-center justify-center">
-                  <span className={`text-sm font-medium ${menu.canView ? "text-brand-primary" : "text-muted-foreground"}`}>
+                <section className="flex gap-2 items-center">
+                  <span className={`text-sm font-medium ${menu.canView
+                    ? "text-brand-primary dark:text-dark-text-primary"
+                    : "text-gray-500 dark:text-dark-text-muted"
+                    }`}>
                     {menu.menuName}
                   </span>
-                  <div className="flex gap-2 items-center justify-center">
-                    <AndroidLogoIcon size={16} />
-                    <GlobeIcon size={16} />
+                  <div className="flex gap-1.5 items-center text-gray-300 dark:text-dark-text-disabled">
+                    <AndroidLogoIcon size={14} />
+                    <GlobeIcon size={14} />
                   </div>
                 </section>
-
                 <Switch
                   className="cursor-pointer"
                   checked={menu.canView}

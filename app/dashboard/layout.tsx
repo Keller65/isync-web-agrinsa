@@ -27,7 +27,7 @@ export default function DashboardLayout({
       <SidebarProvider defaultOpen={true}>
         <AppSidebar />
 
-        <main className="flex-1 w-full bg-gray-50 dark:bg-[#171717]">
+        <main className="flex-1 w-full bg-gray-50 dark:dark:bg-dark-page">
           <div className="p-4 z-50 flex-1 border-b w-full justify-between flex items-center gap-4 sticky top-0">
             <div className="flex items-center gap-2">
               <SidebarTrigger />

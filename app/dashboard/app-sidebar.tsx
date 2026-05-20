@@ -16,12 +16,10 @@ const MENU_CODE_MAP: Record<string, string> = {
   "/dashboard/payments": "INCOMING_PAYMENTS",
   "/dashboard/catalog": "PRODUCT_CATALOG",
   "/dashboard/orders": "SALES_QUOTATIONS",
-  "/dashboard/bulk-upload": "MASS_QUOTATIONS",
   "/dashboard/maps/history": "GPS_HISTORY",
   "/dashboard/maps/real-time": "GPS_REALTIME",
   "/dashboard/users": "USERS",
   "/dashboard/settings": "SETTINGS",
-  "/dashboard/wms": "WMS",
 }
 
 const items = [
@@ -43,19 +41,12 @@ const items = [
         url: "/dashboard/catalog",
         icon: Books,
       },
-
-      {
-        title: "WMS Picking",
-        url: "/dashboard/catalog",
-        icon: Books,
-      },
     ]
   },
   {
     title: "Oferta",
     items: [
       { title: "Oferta de Venta", url: "/dashboard/orders", icon: ShoppingCart },
-      { title: "Oferta Masiva", url: "/dashboard/bulk-upload", icon: FileCsvIcon },
     ]
   },
 
