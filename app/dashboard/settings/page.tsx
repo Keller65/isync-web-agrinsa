@@ -9,17 +9,17 @@ import { toast } from "sonner"
 import {
   RefreshCw, Bell, Database, LogOut, Wifi, Smartphone,
   Image as ImageIcon, Shield, Cpu, Trash2,
-  Volume2, UserCircle, CheckCircle2, AlertTriangle, Download
+  Volume2, UserCircle, CheckCircle2, AlertTriangle, Download,
+  Moon, Sun
 } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useSettingsStore } from '@/lib/store/store.general'
-import { cn } from "@/lib/utils"
-import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu"
+import { cn } from "@/lib/utils"
 
 const navItems = [
   { id: "notifications", label: "Notificaciones", icon: Bell },
@@ -31,11 +31,8 @@ export default function SettingsPage() {
   const router = useRouter()
   const { data: session } = useSession()
   const fullName = session?.user?.fullName ?? null
-  const {
-    pushEnabled, setPushEnabled,
-    soundEnabled, setSoundEnabled,
-    productsWithImage, setProductsWithImage,
-  } = useSettingsStore()
+  const { pushEnabled, setPushEnabled, soundEnabled, setSoundEnabled, productsWithImage, setProductsWithImage } = useSettingsStore()
+  const { setTheme } = useTheme()
 
   const [activeSection, setActiveSection] = useState("notifications")
   const [syncLoading, setSyncLoading] = useState(false)
@@ -48,7 +45,6 @@ export default function SettingsPage() {
   const [wsPort, setWsPort] = useState("")
   const [wsProtocol, setWsProtocol] = useState<"http" | "https">("http")
   const [wsSaving, setWsSaving] = useState(false)
-  const { setTheme } = useTheme()
 
   useEffect(() => {
     calculateCacheSize()
@@ -106,10 +102,7 @@ export default function SettingsPage() {
       if (logCategory !== 'ALL') params.set('category', logCategory)
       const listRes = await fetch(`/api/logs?${params}`)
       const { files } = await listRes.json()
-      if (!files || files.length === 0) {
-        toast.info('No hay logs disponibles para la categoría seleccionada')
-        return
-      }
+      if (!files || files.length === 0) { toast.info('No hay logs disponibles'); return }
       const contents = await Promise.all(
         files.map(async (filePath: string) => {
           const res = await fetch(`/api/logs?file=${encodeURIComponent(filePath)}`)
@@ -162,7 +155,7 @@ export default function SettingsPage() {
             title="Notificaciones Push"
             desc="Alertas globales, nuevos pedidos y actualizaciones de estado."
             checked={pushEnabled}
-            onCheckedChange={(val: boolean) => { setPushEnabled(val); localStorage.setItem('settings:pushEnabled', String(val)) }}
+            onCheckedChange={(val) => { setPushEnabled(val); localStorage.setItem('settings:pushEnabled', String(val)) }}
           />
           <ToggleItem
             icon={<Volume2 />}
@@ -170,7 +163,7 @@ export default function SettingsPage() {
             desc="Reproducir un sonido corto para notificaciones críticas."
             checked={soundEnabled}
             disabled={!pushEnabled}
-            onCheckedChange={(val: boolean) => { setSoundEnabled(val); localStorage.setItem('settings:soundEnabled', String(val)) }}
+            onCheckedChange={(val) => { setSoundEnabled(val); localStorage.setItem('settings:soundEnabled', String(val)) }}
           />
           <ToggleItem
             icon={<ImageIcon />}
@@ -183,7 +176,7 @@ export default function SettingsPage() {
             title="Productos con Imagen"
             desc="Mostrar imagen en el catálogo de productos."
             checked={productsWithImage}
-            onCheckedChange={(val: boolean) => { setProductsWithImage(val); localStorage.setItem('settings:productsWithImage', String(val)) }}
+            onCheckedChange={(val) => { setProductsWithImage(val); localStorage.setItem('settings:productsWithImage', String(val)) }}
           />
         </Section>
       )
@@ -205,7 +198,7 @@ export default function SettingsPage() {
                 onClick={handleSync}
                 disabled={syncLoading}
                 size="sm"
-                className="bg-brand-primary hover:bg-brand-primary/90 rounded-full"
+                className="bg-brand-primary dark:text-dark-text-primary hover:bg-brand-primary/90 rounded-full"
               >
                 <RefreshCw size={14} className={cn("mr-1.5", syncLoading && "animate-spin")} />
                 {syncLoading ? 'Sincronizando...' : 'Sincronizar'}
@@ -214,7 +207,7 @@ export default function SettingsPage() {
                 variant="outline"
                 size="sm"
                 onClick={handleClearCache}
-                className="rounded-full border-gray-200 dark:border-white/[0.07] dark:bg-dark-raised dark:text-dark-text-secondary dark:hover:bg-white/6"
+                className="rounded-full border-gray-200 dark:border-white/7 dark:bg-dark-raised dark:text-dark-text-secondary dark:hover:bg-white/6"
               >
                 <Trash2 size={14} className="mr-1.5 text-gray-500 dark:text-dark-text-muted" />
                 Limpiar Caché
@@ -246,7 +239,7 @@ export default function SettingsPage() {
                 size="sm"
                 onClick={handleExportLogs}
                 disabled={exportingLogs}
-                className="rounded-full border-gray-200 dark:border-white/[0.07] dark:bg-dark-raised dark:text-dark-text-secondary dark:hover:bg-white/6"
+                className="rounded-full  border-gray-200 dark:border-white/7 dark:bg-dark-raised dark:text-dark-text-primary dark:hover:bg-white/6"
               >
                 <Download size={14} className="mr-1.5 text-gray-500 dark:text-dark-text-muted" />
                 {exportingLogs ? 'Exportando...' : 'Descargar'}
@@ -258,23 +251,35 @@ export default function SettingsPage() {
             <p className="text-xs font-bold text-gray-400 dark:text-dark-text-disabled uppercase tracking-wider mb-3">
               Tema
             </p>
-
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="dark:bg-dark-raised dark:border-white/7 dark:text-dark-text-secondary dark:hover:bg-white/6"
+                >
                   <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
                   <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
                   <span className="sr-only">Toggle theme</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setTheme("light")}>
+              <DropdownMenuContent align="end" className="dark:bg-dark-card dark:border-white/[0.07]">
+                <DropdownMenuItem
+                  onClick={() => setTheme("light")}
+                  className="dark:text-dark-text-secondary dark:hover:bg-dark-raised dark:focus:bg-dark-raised dark:focus:text-dark-text-primary"
+                >
                   Light
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme("dark")}>
+                <DropdownMenuItem
+                  onClick={() => setTheme("dark")}
+                  className="dark:text-dark-text-secondary dark:hover:bg-dark-raised dark:focus:bg-dark-raised dark:focus:text-dark-text-primary"
+                >
                   Dark
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme("system")}>
+                <DropdownMenuItem
+                  onClick={() => setTheme("system")}
+                  className="dark:text-dark-text-secondary dark:hover:bg-dark-raised dark:focus:bg-dark-raised dark:focus:text-dark-text-primary"
+                >
                   System
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -317,12 +322,12 @@ export default function SettingsPage() {
                 />
               </div>
             </div>
-            <div className="mt-3 flex gap-2">
+            <div className="mt-3">
               <Button
                 onClick={handleSaveWsConfig}
                 disabled={wsSaving}
                 size="sm"
-                className="bg-brand-primary hover:bg-brand-primary/90 rounded-full"
+                className="bg-brand-primary dark:text-dark-text-primary hover:bg-brand-primary/90 rounded-full"
               >
                 <Wifi size={14} className="mr-1.5" />
                 {wsSaving ? 'Guardando...' : 'Guardar WebSocket'}
@@ -336,8 +341,8 @@ export default function SettingsPage() {
         <Section title="Cuenta y Seguridad" description="Gestiona el acceso y las credenciales de tu sesión activa.">
           <div className="flex items-center justify-between gap-4 p-4 bg-gray-50/50 dark:bg-dark-raised rounded-2xl border border-gray-200 dark:border-white/[0.07]">
             <div className="flex items-center gap-4">
-              <div className="w-11 h-11 rounded-full bg-brand-primary/10 flex items-center justify-center">
-                <UserCircle className="w-6 h-6 text-brand-primary" strokeWidth={1.5} />
+              <div className="w-11 h-11 rounded-full bg-brand-primary/10 dark:bg-dark-card flex items-center justify-center">
+                <UserCircle className="w-6 h-6 text-brand-primary dark:text-dark-text-secondary" strokeWidth={1.5} />
               </div>
               <div>
                 <p className="text-sm font-semibold text-gray-900 dark:text-dark-text-primary">
@@ -385,7 +390,6 @@ export default function SettingsPage() {
       </div>
 
       <div className="flex flex-col md:flex-row gap-6 items-start">
-        {/* Sidebar nav */}
         <aside className="w-full md:w-52 shrink-0">
           <nav className="flex flex-row md:flex-col gap-1 overflow-x-auto md:overflow-visible bg-white dark:bg-dark-card rounded-2xl border border-gray-200 dark:border-white/[0.07] p-2">
             {navItems.map(({ id, label, icon: Icon }) => {
@@ -397,13 +401,16 @@ export default function SettingsPage() {
                   className={cn(
                     "flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-colors w-full text-left",
                     isActive
-                      ? "bg-brand-primary/10 text-brand-primary"
+                      ? "bg-brand-primary/10 dark:bg-dark-raised text-brand-primary dark:text-dark-text-primary"
                       : "text-gray-600 dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-raised hover:text-gray-900 dark:hover:text-dark-text-primary"
                   )}
                 >
                   <Icon
                     size={16}
-                    className={isActive ? "text-brand-primary" : "text-gray-400 dark:text-dark-text-disabled"}
+                    className={isActive
+                      ? "text-brand-primary dark:text-dark-text-primary"
+                      : "text-gray-400 dark:text-dark-text-disabled"
+                    }
                     strokeWidth={isActive ? 2 : 1.5}
                   />
                   {label}
@@ -458,9 +465,7 @@ function ToggleItem({ icon, title, desc, checked, onCheckedChange, disabled = fa
   return (
     <div className={cn(
       "flex items-center justify-between p-4 rounded-2xl border border-gray-200 dark:border-white/[0.07] transition-colors",
-      disabled
-        ? "opacity-50 cursor-not-allowed"
-        : "hover:bg-gray-50/50 dark:hover:bg-dark-raised"
+      disabled ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50/50 dark:hover:bg-dark-raised"
     )}>
       <div className="flex gap-3 items-center">
         <div className="w-9 h-9 bg-gray-100 dark:bg-dark-raised rounded-xl flex items-center justify-center text-gray-500 dark:text-dark-text-muted shrink-0">
@@ -489,7 +494,7 @@ function StatCard({ icon, label, value, pulse = false }: {
 }) {
   return (
     <div className="flex items-center gap-3 p-4 bg-white dark:bg-dark-raised rounded-2xl border border-gray-200 dark:border-white/[0.07]">
-      <div className="w-9 h-9 bg-brand-primary/10 rounded-xl flex items-center justify-center text-brand-primary shrink-0">
+      <div className="w-9 h-9 bg-brand-primary/10 dark:bg-dark-card rounded-xl flex items-center justify-center text-brand-primary dark:text-dark-text-secondary shrink-0">
         {cloneElement(icon, { size: 16, strokeWidth: 1.5 })}
       </div>
       <div className="flex-1 min-w-0">
