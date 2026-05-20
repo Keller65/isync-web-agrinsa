@@ -114,16 +114,6 @@ export default function TwoFactorSetupPage() {
           </div>
         )}
 
-        {/* Manual key — discreta */}
-        {manualKey && (
-          <div className="mb-6 text-center">
-            <p className="text-xs text-gray-400 mb-1">O ingresa la clave manualmente</p>
-            <p className="text-sm font-mono text-gray-600 bg-gray-100 rounded-lg px-3 py-2 inline-block tracking-widest break-all">
-              {manualKey}
-            </p>
-          </div>
-        )}
-
         {/* Divider */}
         <div className="flex items-center gap-3 mb-6">
           <div className="flex-1 h-px bg-gray-200" />
