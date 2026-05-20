@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch"
 import { toast } from "sonner"
 import {
   RefreshCw, Bell, Database, LogOut, Wifi, Smartphone,
-  Image as ImageIcon, Shield, Settings, Cpu, Trash2, MapPin,
+  Image as ImageIcon, Shield, Cpu, Trash2,
   Volume2, UserCircle, CheckCircle2, AlertTriangle, Download
 } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -17,6 +17,9 @@ import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useSettingsStore } from '@/lib/store/store.general'
 import { cn } from "@/lib/utils"
+import { Moon, Sun } from "lucide-react"
+import { useTheme } from "next-themes"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu"
 
 const navItems = [
   { id: "notifications", label: "Notificaciones", icon: Bell },
@@ -29,7 +32,6 @@ export default function SettingsPage() {
   const { data: session } = useSession()
   const fullName = session?.user?.fullName ?? null
   const {
-    biometricEnabled, setBiometricEnabled,
     pushEnabled, setPushEnabled,
     soundEnabled, setSoundEnabled,
     productsWithImage, setProductsWithImage,
@@ -46,6 +48,7 @@ export default function SettingsPage() {
   const [wsPort, setWsPort] = useState("")
   const [wsProtocol, setWsProtocol] = useState<"http" | "https">("http")
   const [wsSaving, setWsSaving] = useState(false)
+  const { setTheme } = useTheme()
 
   useEffect(() => {
     calculateCacheSize()
@@ -249,6 +252,33 @@ export default function SettingsPage() {
                 {exportingLogs ? 'Exportando...' : 'Descargar'}
               </Button>
             </div>
+          </div>
+
+          <div className="pt-2">
+            <p className="text-xs font-bold text-gray-400 dark:text-dark-text-disabled uppercase tracking-wider mb-3">
+              Tema
+            </p>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+                  <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+                  <span className="sr-only">Toggle theme</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setTheme("light")}>
+                  Light
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTheme("dark")}>
+                  Dark
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTheme("system")}>
+                  System
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           <div className="pt-2">

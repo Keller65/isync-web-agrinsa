@@ -46,17 +46,16 @@ const items = [
   {
     title: "Cotizaciones",
     items: [
-      { title: "Cotizacion de Venta", url: "/dashboard/orders", icon: ShoppingCart },
+      { title: "Cotizaciones", url: "/dashboard/orders", icon: ShoppingCart },
     ]
   },
-
-  {
-    title: "Ubicaciones",
-    items: [
-      { title: "Historial GPS", url: "/dashboard/maps/history", icon: ClockCounterClockwiseIcon },
-      { title: "GPS en Tiempo Real", url: "/dashboard/maps/real-time", icon: GpsFixIcon },
-    ]
-  },
+  // {
+  //   title: "Ubicaciones",
+  //   items: [
+  //     { title: "Historial GPS", url: "/dashboard/maps/history", icon: ClockCounterClockwiseIcon },
+  //     { title: "GPS en Tiempo Real", url: "/dashboard/maps/real-time", icon: GpsFixIcon },
+  //   ]
+  // },
   {
     title: "Utilidades",
     items: [

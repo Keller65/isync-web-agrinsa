@@ -13,7 +13,7 @@ export default function Layout({
 
   if (!data?.user.isMasterAdmin) {
     return (
-      <div className="flex-1 w-full bg-gray-50">
+      <div className="flex-1 w-full bg-gray-50 dark:bg-dark-page">
         <div className="flex flex-col items-center justify-center min-h-[92vh] p-8">
           <div className="bg-destructive/10 p-4 rounded-full mb-4">
             <ShieldSlashIcon size={48} className="text-destructive" />
