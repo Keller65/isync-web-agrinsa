@@ -44,9 +44,9 @@ const items = [
     ]
   },
   {
-    title: "Oferta",
+    title: "Cotizaciones",
     items: [
-      { title: "Oferta de Venta", url: "/dashboard/orders", icon: ShoppingCart },
+      { title: "Cotizacion de Venta", url: "/dashboard/orders", icon: ShoppingCart },
     ]
   },
 
