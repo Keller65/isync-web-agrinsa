@@ -263,21 +263,21 @@ function CartISync() {
           </span>
         </DrawerTrigger>
 
-        <DrawerContent className="h-screen min-w-[90vw] md:min-w-[60vw] max-w-150 right-0 left-auto rounded-none border-l">
-          <div className="flex flex-col h-full bg-white justify-between">
+        <DrawerContent className="h-screen min-w-[90vw] md:min-w-[60vw] max-w-150 right-0 left-auto rounded-none border-l dark:border-white/[0.07]">
+          <div className="flex flex-col h-full bg-white dark:bg-dark-card justify-between">
             <DrawerHeader className="flex flex-row justify-between px-4 md:px-8 py-4 md:py-6">
-              <DrawerTitle className="text-lg md:text-2xl font-semibold uppercase tracking-tight flex items-center gap-2 md:gap-3">
+              <DrawerTitle className="text-lg md:text-2xl font-semibold uppercase tracking-tight flex items-center gap-2 md:gap-3 text-gray-900 dark:text-dark-text-primary">
                 Carrito
                 {editMode && (
                   <Badge
                     variant="outline"
-                    className="border-amber-500 text-amber-600 animate-pulse flex gap-1 items-center py-1 text-[10px] md:text-xs"
+                    className="border-amber-500 dark:border-amber-400/40 text-amber-600 dark:text-amber-400 animate-pulse flex gap-1 items-center py-1 text-[10px] md:text-xs"
                   >
                     <Edit3 size={12} /> #{docEntry}
                   </Badge>
                 )}
               </DrawerTitle>
-              <DrawerClose className="cursor-pointer">
+              <DrawerClose className="cursor-pointer text-gray-400 dark:text-dark-text-muted hover:text-gray-900 dark:hover:text-dark-text-primary transition-colors">
                 <X />
               </DrawerClose>
             </DrawerHeader>
@@ -287,14 +287,14 @@ function CartISync() {
                 placeholder="Instrucciones especiales, notas..."
                 value={comments}
                 onChange={e => setComments(e.target.value)}
-                className="bg-gray-50 border-gray-200 rounded-2xl focus:border-black min-h-10 max-h-10 resize-none text-sm"
+                className="bg-gray-50 dark:bg-dark-raised border-gray-200 dark:border-white/[0.07] text-gray-900 dark:text-dark-text-primary placeholder:text-gray-400 dark:placeholder:text-dark-text-disabled rounded-2xl focus:border-black dark:focus:border-white/30 min-h-10 max-h-10 resize-none text-sm"
               />
-
               {editMode && (
                 <Button
                   onClick={() => setShowCancelOrderAlert(true)}
                   variant="destructive"
-                  className="rounded-full cursor-pointer min-h-10 text-xs">
+                  className="rounded-full cursor-pointer min-h-10 text-xs"
+                >
                   Cancelar Pedido
                 </Button>
               )}
@@ -310,43 +310,50 @@ function CartISync() {
                   const taxCode = item.taxCode
 
                   return (
-                    <div key={item.itemCode} className="group flex items-center gap-2 md:gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors border border-gray-200/50">
+                    <div
+                      key={item.itemCode}
+                      className="group flex items-center gap-2 md:gap-3 p-3 rounded-xl bg-gray-50 dark:bg-dark-raised hover:bg-gray-100 dark:hover:bg-white/6 transition-colors border border-gray-200/50 dark:border-white/6"
+                    >
                       <div className="relative shrink-0">
                         <Image
                           src={`https://pub-266f56f2e24d4d3b8e8abdb612029f2f.r2.dev/100000.jpg`}
                           alt={item.itemCode}
                           width={48}
                           height={48}
-                          className="object-contain rounded-lg bg-white md:w-14 md:h-14"
+                          className="object-contain rounded-lg bg-white dark:bg-dark-card md:w-14 md:h-14"
                         />
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 truncate">{item.itemName}</p>
-                        <p className="text-xs text-gray-400 font-mono">{item.itemCode}</p>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-dark-text-primary truncate">
+                          {item.itemName}
+                        </p>
+                        <p className="text-xs text-gray-400 dark:text-dark-text-disabled font-mono">
+                          {item.itemCode}
+                        </p>
                         <div className="flex flex-wrap items-center gap-1.5 mt-1.5 text-xs">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-brand-primary/10 text-brand-primary font-medium">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-brand-primary/10 dark:bg-dark-card text-brand-primary dark:text-dark-text-secondary font-medium">
                             Cant: {quantity}
                           </span>
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-brand-primary/10 text-brand-primary font-medium">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-brand-primary/10 dark:bg-dark-card text-brand-primary dark:text-dark-text-secondary font-medium">
                             SKU: {sku}
                           </span>
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-brand-primary/10 text-brand-primary font-medium">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-brand-primary/10 dark:bg-dark-card text-brand-primary dark:text-dark-text-secondary font-medium">
                             {taxCode}
                           </span>
-                          <span className="text-gray-500">
+                          <span className="text-gray-500 dark:text-dark-text-muted">
                             L. <PriceDisplay price={unitPrice} decimalNum={4} /> c/u
                           </span>
                         </div>
                       </div>
 
                       <div className="flex flex-col items-end gap-2 shrink-0">
-                        <span className="font-bold text-sm text-gray-900">
+                        <span className="font-bold text-sm text-gray-900 dark:text-dark-text-primary">
                           L. <PriceDisplay price={totalPrice} decimalNum={2} />
                         </span>
                         <button
                           onClick={() => removeProduct(item.itemCode)}
-                          className="opacity-100 md:opacity-0 md:group-hover:opacity-100 p-1.5 rounded-full text-red-500 hover:bg-red-50 hover:text-red-600 transition-all"
+                          className="opacity-100 md:opacity-0 cursor-pointer md:group-hover:opacity-100 p-1.5 rounded-full text-red-500 hover:bg-red-50 dark:hover:bg-red-400/10 hover:text-red-600 dark:hover:text-red-400 transition-all"
                         >
                           <Trash size={16} />
                         </button>
@@ -357,30 +364,32 @@ function CartISync() {
               </div>
             </ScrollArea>
 
-            <div className="px-4 md:px-8 py-4 bg-[#fcfcfc] border-t border-gray-100 sticky bottom-0">
+            {/* Footer */}
+            <div className="px-4 md:px-8 py-4 bg-[#fcfcfc] dark:bg-dark-page border-t border-gray-100 dark:border-white/6 sticky bottom-0">
               <div className="space-y-2 mb-3 md:mb-4">
                 <div className="flex justify-between text-xs md:text-sm items-center">
-                  <span className="text-gray-500">Ubicación</span>
-                  <p className="text-xs md:text-sm truncate max-w-50">{selectedAddress?.addressName ?? "No selec."}</p>
+                  <span className="text-gray-500 dark:text-dark-text-muted">Ubicación</span>
+                  <p className="text-xs md:text-sm dark:text-dark-text-secondary truncate max-w-50">
+                    {selectedAddress?.addressName ?? "No selec."}
+                  </p>
                 </div>
-
                 <div className="flex justify-between text-xs md:text-sm">
-                  <span className="text-gray-500">Subtotal</span>
-                  <span className="font-medium">
+                  <span className="text-gray-500 dark:text-dark-text-muted">Subtotal</span>
+                  <span className="font-medium dark:text-dark-text-secondary">
                     L. {subtotal.toLocaleString("es-HN", { minimumFractionDigits: 2 })}
                   </span>
                 </div>
-
                 <div className="flex justify-between text-xs md:text-sm">
-                  <span className="text-gray-500">ISV (15%)</span>
-                  <span className="font-medium">
+                  <span className="text-gray-500 dark:text-dark-text-muted">ISV (15%)</span>
+                  <span className="font-medium dark:text-dark-text-secondary">
                     L. {calculatedTax.toLocaleString("es-HN", { minimumFractionDigits: 2 })}
                   </span>
                 </div>
-
-                <div className="flex justify-between text-base md:text-lg pt-3 md:pt-4 border-t border-gray-200">
-                  <span className="font-light uppercase tracking-wider text-sm md:text-base">Total</span>
-                  <span className="font-bold">
+                <div className="flex justify-between text-base md:text-lg pt-3 md:pt-4 border-t border-gray-200 dark:border-white/6">
+                  <span className="font-light uppercase tracking-wider text-sm md:text-base dark:text-dark-text-secondary">
+                    Total
+                  </span>
+                  <span className="font-bold dark:text-dark-text-primary">
                     L. {total.toLocaleString("es-HN", { minimumFractionDigits: 2 })}
                   </span>
                 </div>
@@ -397,7 +406,7 @@ function CartISync() {
                       setShowConfirmAlert(true)
                     }
                   }}
-                  className="w-full font-normal bg-brand-primary text-white hover:bg-brand-primary h-12 md:h-13 text-sm md:text-md tracking-[0.3px] rounded-full cursor-pointer disabled:bg-gray-300 disabled:text-gray-600"
+                  className="w-full font-normal bg-brand-primary text-white hover:bg-brand-primary h-12 md:h-13 text-sm md:text-md tracking-[0.3px] rounded-full cursor-pointer disabled:bg-gray-300 dark:disabled:bg-dark-raised disabled:text-gray-600 dark:disabled:text-dark-text-disabled"
                   disabled={productsInCart.length === 0 || isLoading}
                 >
                   {isLoading ? "Procesando..." : editMode ? "Actualizar" : "Realizar Pedido"}
@@ -412,14 +421,13 @@ function CartISync() {
                       <Plus size={14} /> Agregar
                     </Link>
                   </DrawerClose>
-
                   <Button
                     onClick={() => {
                       fetchAddresses()
                       setShowAddressDialog(true)
                     }}
-                    disabled={false}
-                    className="size-12 md:size-13 rounded-full bg-brand-primary hover:bg-brand-primary p-0 grid place-content-center cursor-pointer disabled:bg-gray-300 disabled:text-gray-600">
+                    className="size-12 md:size-13 rounded-full bg-brand-primary hover:bg-brand-primary p-0 grid place-content-center cursor-pointer disabled:bg-gray-300 dark:disabled:bg-dark-raised"
+                  >
                     <MapPinLine size={68} />
                   </Button>
                 </div>
@@ -429,13 +437,14 @@ function CartISync() {
         </DrawerContent>
       </Drawer>
 
+      {/* Alert — Error */}
       <AlertDialog open={showErrorAlert} onOpenChange={setShowErrorAlert}>
-        <AlertDialogContent className="bg-[#ff9e9e] border-none">
+        <AlertDialogContent className="bg-[#ff9e9e] dark:bg-red-400/10 border-none dark:border dark:border-red-400/20">
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-red-700">
+            <AlertDialogTitle className="flex items-center gap-2 text-red-700 dark:text-red-400">
               <AlertCircle size={20} /> Error en la solicitud
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-red-700 pt-2">
+            <AlertDialogDescription className="text-red-700 dark:text-red-400 pt-2">
               {errorMessage}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -447,78 +456,74 @@ function CartISync() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog
-        open={showAddressDialog}
-        onOpenChange={setShowAddressDialog}
-      >
-        <AlertDialogContent>
+      {/* Alert — Seleccionar dirección */}
+      <AlertDialog open={showAddressDialog} onOpenChange={setShowAddressDialog}>
+        <AlertDialogContent className="dark:bg-dark-card dark:border-white/[0.07]">
           <AlertDialogHeader>
-            <AlertDialogTitle>Seleccionar ubicación</AlertDialogTitle>
+            <AlertDialogTitle className="dark:text-dark-text-primary">
+              Seleccionar ubicación
+            </AlertDialogTitle>
           </AlertDialogHeader>
-
           <ScrollArea className="max-h-75">
             <div className="space-y-2">
               {addresses.map(addr => (
                 <button
                   key={addr.rowNum}
-                  className="w-full border border-gray-200 rounded-md p-3 text-left hover:border-black"
+                  className="w-full border border-gray-200 dark:border-white/[0.07] rounded-md p-3 text-left hover:border-black dark:hover:border-white/30 dark:bg-dark-raised transition-colors"
                   onClick={() => {
                     setSelectedAddress(addr)
                     setShowAddressDialog(false)
                   }}
                 >
-                  <p className="text-sm font-medium">{addr.addressName}</p>
-                  <p className="text-xs text-gray-400">
-                    {addr.street} · {addr.ciudadName},{" "}
-                    {addr.stateName}
+                  <p className="text-sm font-medium dark:text-dark-text-primary">{addr.addressName}</p>
+                  <p className="text-xs text-gray-400 dark:text-dark-text-muted">
+                    {addr.street} · {addr.ciudadName}, {addr.stateName}
                   </p>
                 </button>
               ))}
             </div>
           </ScrollArea>
-
           <AlertDialogFooter>
-            <AlertDialogCancel>Cerrar</AlertDialogCancel>
+            <AlertDialogCancel className="dark:bg-dark-raised dark:text-dark-text-secondary dark:border-white/[0.07]">
+              Cerrar
+            </AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog
-        open={showConfirmAlert}
-        onOpenChange={setShowConfirmAlert}
-      >
-        <AlertDialogContent>
+      {/* Alert — Confirmar pedido */}
+      <AlertDialog open={showConfirmAlert} onOpenChange={setShowConfirmAlert}>
+        <AlertDialogContent className="dark:bg-dark-card dark:border-white/[0.07]">
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="dark:text-dark-text-primary">¿Estás seguro?</AlertDialogTitle>
+            <AlertDialogDescription className="dark:text-dark-text-muted">
               {editMode
                 ? "¿Deseas actualizar este pedido con los cambios actuales?"
                 : "¿Seguro que quieres enviar este pedido?"}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>No, cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleSubmitOrder}>
-              Sí, enviar
-            </AlertDialogAction>
+            <AlertDialogCancel className="dark:bg-dark-raised dark:text-dark-text-secondary dark:border-white/[0.07]">
+              No, cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleSubmitOrder}>Sí, enviar</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog
-        open={showCancelOrderAlert}
-        onOpenChange={setShowCancelOrderAlert}
-      >
-        <AlertDialogContent>
+      {/* Alert — Vaciar carrito */}
+      <AlertDialog open={showCancelOrderAlert} onOpenChange={setShowCancelOrderAlert}>
+        <AlertDialogContent className="dark:bg-dark-card dark:border-white/[0.07]">
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Vaciar carrito?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Se eliminarán todos los productos y se cancelará el proceso
-              actual.
+            <AlertDialogTitle className="dark:text-dark-text-primary">¿Vaciar carrito?</AlertDialogTitle>
+            <AlertDialogDescription className="dark:text-dark-text-muted">
+              Se eliminarán todos los productos y se cancelará el proceso actual.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Volver</AlertDialogCancel>
+            <AlertDialogCancel className="dark:bg-dark-raised dark:text-dark-text-secondary dark:border-white/[0.07]">
+              Volver
+            </AlertDialogCancel>
             <AlertDialogAction
               className="bg-red-500 text-white hover:bg-red-600"
               onClick={handleCancelOrder}
@@ -529,44 +534,54 @@ function CartISync() {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Alert — Éxito */}
       <AlertDialog open={showSuccessAlert} onOpenChange={setShowSuccessAlert}>
-        <AlertDialogContent className="bg-green-300 border-green-300">
+        <AlertDialogContent className="bg-green-300 dark:bg-green-400/10 border-green-300 dark:border-green-400/20">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-green-600">{editMode ? "¡Pedido Actualizado!" : "¡Pedido Creado!"}</AlertDialogTitle>
-            <AlertDialogDescription className="text-green-600">
-              El pedido ha sido {editMode ? "actualizado correctamente" : <>creado correctamente con el número <strong>#{orderInfo.docEntry}</strong></>}.
+            <AlertDialogTitle className="text-green-600 dark:text-green-400">
+              {editMode ? "¡Pedido Actualizado!" : "¡Pedido Creado!"}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-green-600 dark:text-green-400">
+              El pedido ha sido{" "}
+              {editMode
+                ? "actualizado correctamente"
+                : <>creado correctamente con el número <strong>#{orderInfo.docEntry}</strong></>}
+              .
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={handleSuccess}>
-              Aceptar
-            </AlertDialogAction>
+            <AlertDialogAction onClick={handleSuccess}>Aceptar</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Alert — Editar cliente */}
       {selectedCustomer?.editRTN && (
         <AlertDialog open={showEditCustomerDialog} onOpenChange={setShowEditCustomerDialog}>
-          <AlertDialogContent>
+          <AlertDialogContent className="dark:bg-dark-card dark:border-white/[0.07]">
             <AlertDialogHeader>
-              <AlertDialogTitle>Editar Datos del Cliente</AlertDialogTitle>
-              <AlertDialogDescription>
+              <AlertDialogTitle className="dark:text-dark-text-primary">
+                Editar Datos del Cliente
+              </AlertDialogTitle>
+              <AlertDialogDescription className="dark:text-dark-text-muted">
                 Actualice el nombre y RTN del cliente según sea necesario.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Nombre del Cliente</label>
+                <label className="text-sm font-medium dark:text-dark-text-secondary">
+                  Nombre del Cliente
+                </label>
                 <input
                   type="text"
                   value={editCustomerName}
                   onChange={(e) => setEditCustomerName(e.target.value)}
-                  className="w-full p-2 border border-gray-200 rounded-md"
+                  className="w-full p-2 border border-gray-200 dark:border-white/[0.07] rounded-md bg-white dark:bg-dark-raised text-gray-900 dark:text-dark-text-primary placeholder:text-gray-400 dark:placeholder:text-dark-text-disabled"
                   placeholder="Nombre del cliente"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">RTN</label>
+                <label className="text-sm font-medium dark:text-dark-text-secondary">RTN</label>
                 <input
                   type="text"
                   value={editCustomerRTN}
@@ -574,21 +589,30 @@ function CartISync() {
                     const value = e.target.value.replace(/\D/g, '').slice(0, 14)
                     setEditCustomerRTN(value)
                   }}
-                  className="w-full p-2 border border-gray-200 rounded-md"
+                  className="w-full p-2 border border-gray-200 dark:border-white/[0.07] rounded-md bg-white dark:bg-dark-raised text-gray-900 dark:text-dark-text-primary placeholder:text-gray-400 dark:placeholder:text-dark-text-disabled"
                   placeholder="Ingrese 14 dígitos"
                 />
-                <p className="text-xs text-gray-400">{editCustomerRTN.length}/14 caracteres</p>
+                <p className="text-xs text-gray-400 dark:text-dark-text-disabled">
+                  {editCustomerRTN.length}/14 caracteres
+                </p>
               </div>
             </div>
             <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => {
-                setEditCustomerName(selectedCustomer?.cardName ?? "")
-                setEditCustomerRTN(selectedCustomer?.federalTaxID ?? "")
-              }}>
+              <AlertDialogCancel
+                className="dark:bg-dark-raised dark:text-dark-text-secondary dark:border-white/[0.07]"
+                onClick={() => {
+                  setEditCustomerName(selectedCustomer?.cardName ?? "")
+                  setEditCustomerRTN(selectedCustomer?.federalTaxID ?? "")
+                }}
+              >
                 Cancelar
               </AlertDialogCancel>
               <AlertDialogAction
-                className={editCustomerName.trim().length === 0 || editCustomerRTN.length !== 14 ? "bg-gray-200 text-gray-500 hover:bg-gray-200" : ""}
+                className={
+                  editCustomerName.trim().length === 0 || editCustomerRTN.length !== 14
+                    ? "bg-gray-200 dark:bg-dark-raised text-gray-500 dark:text-dark-text-disabled hover:bg-gray-200"
+                    : ""
+                }
                 disabled={editCustomerName.trim().length === 0 || editCustomerRTN.length !== 14}
                 onClick={() => {
                   if (editCustomerRTN.length !== 14) {

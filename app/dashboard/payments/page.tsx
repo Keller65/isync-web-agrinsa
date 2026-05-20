@@ -73,7 +73,7 @@ export default function PaymentsPage() {
     <div className="p-4 md:p-6">
       <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between mb-6">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
             Pagos recibidos
           </h2>
           <p className="text-sm text-gray-500">
@@ -124,60 +124,62 @@ export default function PaymentsPage() {
             <Link
               key={item.docEntry}
               href={`/dashboard/payments/${item.docEntry}`}
-              className="bg-white dark:bg-[#141414] rounded-2xl p-5 border border-gray-200 block hover:border-gray-300 transition-colors"
+              className="bg-white dark:bg-dark-card border border-gray-200 dark:border-white/7 rounded-2xl p-5 block hover:border-gray-300 dark:hover:border-white/12 transition-colors"
             >
+              {/* Header */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <FileText size={22} className="text-gray-700" />
-                  <p className="text-sm text-gray-600">
+                  <FileText size={22} className="text-gray-700 dark:text-dark-text-secondary" />
+                  <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
                     Pago{" "}
-                    <span className="font-semibold text-gray-900">
+                    <span className="font-semibold text-gray-900 dark:text-dark-text-primary">
                       #{item.docNum}
                     </span>
                   </p>
                 </div>
-
                 <span className="text-xs font-medium bg-brand-primary text-white px-3 py-1 rounded-full">
                   Recibido
                 </span>
               </div>
 
+              {/* Cliente */}
               <div className="flex items-start gap-3 mb-4">
-                <div className="bg-gray-100 size-10 rounded-full overflow-hidden shrink-0">
+                <div className="bg-gray-100 dark:bg-dark-raised size-10 rounded-full overflow-hidden shrink-0">
                   <Avvvatars value={item.cardName} size={40} />
                 </div>
                 <div className="flex-1 overflow-hidden">
-                  <p className="text-xs text-gray-500">Cliente</p>
-                  <p className="text-base font-semibold text-gray-900 truncate">
+                  <p className="text-xs text-gray-500 dark:text-dark-text-muted">Cliente</p>
+                  <p className="text-base font-semibold text-gray-900 dark:text-dark-text-primary truncate">
                     {item.cardName}
                   </p>
                 </div>
               </div>
 
+              {/* Stats */}
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-start gap-2">
-                  <div className="bg-gray-100 p-1.5 rounded-full">
-                    <CalendarDots size={18} className="text-gray-600" />
+                  <div className="bg-gray-100 dark:bg-dark-raised p-1.5 rounded-full">
+                    <CalendarDots size={18} className="text-gray-600 dark:text-dark-text-muted" />
                   </div>
                   <div>
-                    <p className="text-[10px] text-gray-500 leading-none">
+                    <p className="text-[10px] text-gray-500 dark:text-dark-text-muted leading-none">
                       Fecha
                     </p>
-                    <p className="text-sm font-semibold text-gray-900">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-dark-text-primary">
                       {new Date(item.docDate).toLocaleDateString("es-HN")}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-2">
-                  <div className="bg-gray-100 p-1.5 rounded-full">
-                    <Coins size={18} className="text-gray-600" />
+                  <div className="bg-gray-100 dark:bg-dark-raised p-1.5 rounded-full">
+                    <Coins size={18} className="text-gray-600 dark:text-dark-text-muted" />
                   </div>
                   <div>
-                    <p className="text-[10px] text-gray-500 leading-none">
+                    <p className="text-[10px] text-gray-500 dark:text-dark-text-muted leading-none">
                       Total
                     </p>
-                    <p className="text-sm font-bold text-gray-900">
+                    <p className="text-sm font-bold text-gray-900 dark:text-dark-text-primary">
                       L.{" "}
                       {item.total.toLocaleString("es-HN", {
                         minimumFractionDigits: 2,
@@ -187,7 +189,8 @@ export default function PaymentsPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-1 text-xs text-gray-500">
+              {/* Medio de pago */}
+              <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted">
                 <CreditCard size={14} />
                 {item.paymentMeans}
               </div>

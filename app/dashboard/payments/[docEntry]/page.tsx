@@ -84,10 +84,11 @@ export default function PaymentPage() {
 
   return (
     <div className="max-w-5xl mx-auto p-4 md:py-8">
+      {/* Nav */}
       <div className="flex items-center justify-between mb-6">
         <Link
           href="/dashboard/payments"
-          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900"
+          className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-dark-text-muted hover:text-gray-900 dark:hover:text-dark-text-primary transition-colors"
         >
           <ArrowLeft size={16} />
           Pagos
@@ -98,21 +99,14 @@ export default function PaymentPage() {
             <PDFDownloadLink
               document={<PaymentReceiptPDF payment={payment} />}
               fileName={`RECIBO-PAGO-${payment.docNum}-${payment.cardName}.pdf`}
-              className="cursor-pointer flex items-center justify-center gap-2 px-3.5 py-2 text-sm font-medium text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all"
+              className="cursor-pointer flex items-center justify-center gap-2 px-3.5 py-2 text-sm font-medium text-gray-600 dark:text-dark-text-secondary bg-white dark:bg-dark-card border border-gray-200 dark:border-white/[0.07] rounded-xl hover:bg-gray-50 dark:hover:bg-dark-raised transition-all"
             >
-              {({ loading }) =>
-                loading ? (
-                  <>
-                    <DownloadSimpleIcon size={16} />
-                    Generando...
-                  </>
-                ) : (
-                  <>
-                    <DownloadSimpleIcon size={16} />
-                    Descargar
-                  </>
-                )
-              }
+              {({ loading }) => (
+                <>
+                  <DownloadSimpleIcon size={16} />
+                  {loading ? 'Generando...' : 'Descargar'}
+                </>
+              )}
             </PDFDownloadLink>
 
             <button
@@ -120,17 +114,8 @@ export default function PaymentPage() {
               disabled={isGenerating}
               className="cursor-pointer flex items-center justify-center gap-2 px-3.5 py-2 text-sm font-medium text-white bg-brand-primary rounded-xl hover:bg-brand-primary/90 transition-all disabled:opacity-50"
             >
-              {isGenerating ? (
-                <>
-                  <Printer size={16} />
-                  Generando...
-                </>
-              ) : (
-                <>
-                  <Printer size={16} />
-                  Imprimir
-                </>
-              )}
+              <Printer size={16} />
+              {isGenerating ? 'Generando...' : 'Imprimir'}
             </button>
           </div>
         )}
@@ -139,13 +124,12 @@ export default function PaymentPage() {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
-          <h1 className="text-2xl font-semibold text-gray-900">
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-dark-text-primary">
             Pago #{payment.docNum}
           </h1>
           <Badge variant="secondary">Recibido</Badge>
         </div>
-
-        <div className="flex items-center gap-2 text-sm text-gray-500">
+        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-dark-text-muted">
           <CalendarDots size={16} />
           {new Date(payment.docDate).toLocaleDateString("es-HN", {
             year: "numeric",
@@ -156,76 +140,67 @@ export default function PaymentPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* FACTURAS */}
+        {/* Facturas */}
         <section className="lg:col-span-1">
-          <div className="bg-white border border-gray-200 rounded-xl p-6">
-            <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <div className="bg-white dark:bg-dark-card border border-gray-200 dark:border-white/[0.07] rounded-xl p-6">
+            <h3 className="text-base font-semibold text-gray-900 dark:text-dark-text-primary mb-4 flex items-center gap-2">
               <Receipt size={18} />
               Facturas aplicadas
             </h3>
 
             {payment.invoices.length > 0 ? (
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-gray-100 dark:divide-white/6">
                 {payment.invoices.map((invoice) => (
                   <div
                     key={invoice.invoiceDocEntry}
                     className="flex items-center justify-between py-4"
                   >
                     <div className="flex items-start gap-3">
-                      <div className="bg-gray-100 rounded-lg p-2">
-                        <FileText size={18} />
+                      <div className="bg-gray-100 dark:bg-dark-raised rounded-lg p-2">
+                        <FileText size={18} className="text-gray-600 dark:text-dark-text-muted" />
                       </div>
-
                       <div>
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className="text-sm font-medium text-gray-900 dark:text-dark-text-primary">
                           Factura #{invoice.invoiceDocNum}
                         </p>
-                        <div className="flex items-center gap-1 text-xs text-gray-500">
+                        <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-dark-text-muted">
                           <Coins size={12} />
-                          Total: L.{" "}
-                          {invoice.docTotal.toLocaleString("es-HN")}
+                          Total: L. {invoice.docTotal.toLocaleString("es-HN")}
                         </div>
                       </div>
                     </div>
 
                     <div className="text-right">
-                      <p className="text-[10px] text-gray-500">
-                        Aplicado
-                      </p>
-                      <p className="text-sm font-semibold text-gray-900">
-                        L.{" "}
-                        {invoice.appliedAmount.toLocaleString(
-                          "es-HN",
-                          { minimumFractionDigits: 2 }
-                        )}
+                      <p className="text-[10px] text-gray-500 dark:text-dark-text-muted">Aplicado</p>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-dark-text-primary">
+                        L. {invoice.appliedAmount.toLocaleString("es-HN", { minimumFractionDigits: 2 })}
                       </p>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-dark-text-muted">
                 No hay facturas asociadas a este pago
               </p>
             )}
           </div>
         </section>
 
-        {/* SIDEBAR */}
+        {/* Sidebar */}
         <aside className="space-y-6">
           {/* Cliente */}
-          <div className="bg-white border border-gray-200 rounded-xl p-6">
-            <h3 className="text-xs font-semibold text-gray-500 uppercase mb-4">
+          <div className="bg-white dark:bg-dark-card border border-gray-200 dark:border-white/[0.07] rounded-xl p-6">
+            <h3 className="text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase mb-4">
               Cliente
             </h3>
-
             <div className="flex items-center gap-3">
               <Avvvatars value={payment.cardName} size={40} />
               <div>
-                <p className="font-medium text-gray-900">
+                <p className="font-medium text-gray-900 dark:text-dark-text-primary">
                   {payment.cardName}
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-dark-text-muted">
                   {payment.cardCode}
                 </p>
               </div>
@@ -233,77 +208,62 @@ export default function PaymentPage() {
           </div>
 
           {/* Resumen */}
-          <div className="bg-white border border-gray-200 rounded-xl p-6">
-            <h3 className="text-xs font-semibold text-gray-500 uppercase mb-4">
+          <div className="bg-white dark:bg-dark-card border border-gray-200 dark:border-white/[0.07] rounded-xl p-6">
+            <h3 className="text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase mb-4">
               Resumen del pago
             </h3>
-
             <div className="space-y-3">
               <Row label="Monto del pago" value={payment.total} />
 
-              <Separator />
+              <Separator className="dark:bg-white/6" />
 
               <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-600">Medio</span>
+                <span className="text-gray-600 dark:text-dark-text-secondary">Medio</span>
                 <div className="flex items-center gap-1">
-                  <CreditCard size={14} />
-                  <Badge variant="secondary">
-                    {payment.paymentMeans}
-                  </Badge>
+                  <CreditCard size={14} className="text-gray-500 dark:text-dark-text-muted" />
+                  <Badge variant="secondary">{payment.paymentMeans}</Badge>
                 </div>
               </div>
 
-              {payment.transfer > 0 && (
-                <Row label="Transferencia" value={payment.transfer} />
-              )}
-              {payment.cash > 0 && (
-                <Row label="Efectivo" value={payment.cash} />
-              )}
-              {payment.check > 0 && (
-                <Row label="Cheque" value={payment.check} />
-              )}
-              {payment.credit > 0 && (
-                <Row label="Crédito" value={payment.credit} />
-              )}
+              {payment.transfer > 0 && <Row label="Transferencia" value={payment.transfer} />}
+              {payment.cash > 0 && <Row label="Efectivo" value={payment.cash} />}
+              {payment.check > 0 && <Row label="Cheque" value={payment.check} />}
+              {payment.credit > 0 && <Row label="Crédito" value={payment.credit} />}
             </div>
           </div>
 
-          {/* DETALLE TRANSFERENCIA */}
-          {payment.paymentMeans === "Transfer" &&
-            payment.payment?.length > 0 && (
-              <div className="bg-white border border-gray-200 rounded-xl p-6">
-                <h3 className="text-xs font-semibold text-gray-500 uppercase mb-4 flex items-center gap-2">
-                  <Bank size={14} />
-                  Detalle de transferencia
-                </h3>
-
-                <div className="space-y-3 text-sm">
-                  <Detail
-                    icon={<Hash size={14} />}
-                    label="Referencia"
-                    value={payment.payment[0].transferReference}
-                  />
-                  <Detail
-                    icon={<Bank size={14} />}
-                    label="Cuenta destino"
-                    value={payment.payment[0].transferAccountName}
-                  />
-                  <Detail
-                    icon={<CalendarDots size={14} />}
-                    label="Fecha"
-                    value={new Date(
-                      payment.payment[0].transferDate
-                    ).toLocaleDateString("es-HN")}
-                  />
-                </div>
+          {/* Detalle transferencia */}
+          {payment.paymentMeans === "Transfer" && payment.payment?.length > 0 && (
+            <div className="bg-white dark:bg-dark-card border border-gray-200 dark:border-white/[0.07] rounded-xl p-6">
+              <h3 className="text-xs font-semibold text-gray-500 dark:text-dark-text-muted uppercase mb-4 flex items-center gap-2">
+                <Bank size={14} />
+                Detalle de transferencia
+              </h3>
+              <div className="space-y-3 text-sm">
+                <Detail
+                  icon={<Hash size={14} />}
+                  label="Referencia"
+                  value={payment.payment[0].transferReference}
+                />
+                <Detail
+                  icon={<Bank size={14} />}
+                  label="Cuenta destino"
+                  value={payment.payment[0].transferAccountName}
+                />
+                <Detail
+                  icon={<CalendarDots size={14} />}
+                  label="Fecha"
+                  value={new Date(payment.payment[0].transferDate).toLocaleDateString("es-HN")}
+                />
               </div>
-            )}
+            </div>
+          )}
 
-          {/* CANCELADO */}
+          {/* Cancelado */}
           {payment.cancelled === "Y" && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex gap-3">
-              <Info size={18} className="text-red-600 mt-0.5" />
-              <p className="text-sm font-medium text-red-700">
+            <div className="bg-red-50 dark:bg-red-400/10 border border-red-200 dark:border-red-400/20 rounded-xl p-4 flex gap-3">
+              <Info size={18} className="text-red-600 dark:text-red-400 mt-0.5 shrink-0" />
+              <p className="text-sm font-medium text-red-700 dark:text-red-400">
                 Este pago fue cancelado y no tiene efecto contable
               </p>
             </div>
