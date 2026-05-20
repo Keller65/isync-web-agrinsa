@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch"
 import { Input } from "@/components/ui/input"
 import { useSession } from "next-auth/react"
 import { AdminUser, MenuItemResponse } from "@/types/api-types"
-import { toast } from "sonner"
+import { toast, Toaster } from "sonner"
 import { ShieldIcon } from "lucide-react"
 
 export default function EditUserPage() {
@@ -25,6 +25,7 @@ export default function EditUserPage() {
   const [savingMenu, setSavingMenu] = useState(false)
   const [savingUser, setSavingUser] = useState(false)
   const [resetting2FA, setResetting2FA] = useState(false)
+  const [deleteUser, setDeleteUser] = useState(false)
   const [newPassword, setNewPassword] = useState("")
   const [resetTwoFactor, setResetTwoFactor] = useState(true)
   const [resettingPassword, setResettingPassword] = useState(false)
@@ -205,6 +206,26 @@ export default function EditUserPage() {
     }
   }
 
+  const handleDeleteUser = async () => {
+    try {
+      const response = await axios.delete(
+        `/api-proxy/api/isync/auth/admin/users/${userId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.warning('Usuario Eliminado', {
+        description: 'se elimino el usuario tanto web como android',
+      })
+
+      console.log(response.data);
+      setDeleteUser(true)
+      router.replace('/dashboard/users')
+    } catch (error) {
+      setDeleteUser(false)
+      toast.error(`Error al eliminar el usuario: ${error}`)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -276,100 +297,107 @@ export default function EditUserPage() {
         </section>
 
         {/* Columna derecha */}
-        <section className="flex-1">
-          <div className="space-y-4">
+        <section className="flex-1 flex flex-col gap-4">
 
-            {/* Opciones adicionales */}
-            <div className="bg-white dark:bg-dark-card border border-gray-200 dark:border-white/[0.07] rounded-xl p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-brand-primary/10 dark:bg-dark-raised rounded-lg">
-                  <Shield size={20} className="text-brand-primary dark:text-dark-text-secondary" />
-                </div>
-                <h2 className="text-lg font-semibold dark:text-dark-text-primary">Opciones adicionales</h2>
+          {/* Opciones adicionales */}
+          <div className="bg-white dark:bg-dark-card border border-gray-200 dark:border-white/[0.07] rounded-xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-brand-primary/10 dark:bg-dark-raised rounded-lg">
+                <Shield size={20} className="text-brand-primary dark:text-dark-text-secondary" />
               </div>
+              <h2 className="text-lg font-semibold dark:text-dark-text-primary">Opciones adicionales</h2>
+            </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                {[
-                  { icon: UserIcon, label: "Permitir login web", key: "canLoginWeb" },
-                  { icon: UserIcon, label: "Permitir login app", key: "canLoginApp" },
-                  { icon: ShieldIcon, label: "Es administrador maestro", key: "isMasterAdmin" },
-                  { icon: UserIcon, label: "Usuario activo", key: "isActive" },
-                ].map(({ icon: Icon, label, key }) => (
-                  <div
-                    key={key}
-                    className="flex items-center justify-between rounded-lg hover:bg-gray-50 dark:hover:bg-dark-raised transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-gray-100 dark:bg-dark-raised rounded-lg">
-                        <Icon size={18} className="text-gray-500 dark:text-dark-text-muted" />
-                      </div>
-                      <label className="text-sm font-medium dark:text-dark-text-secondary">{label}</label>
+            <div className="grid grid-cols-2 gap-4">
+              {[
+                { icon: UserIcon, label: "Permitir login web", key: "canLoginWeb" },
+                { icon: UserIcon, label: "Permitir login app", key: "canLoginApp" },
+                { icon: ShieldIcon, label: "Es administrador maestro", key: "isMasterAdmin" },
+                { icon: UserIcon, label: "Usuario activo", key: "isActive" },
+              ].map(({ icon: Icon, label, key }) => (
+                <div
+                  key={key}
+                  className="flex items-center justify-between rounded-lg hover:bg-gray-50 dark:hover:bg-dark-raised transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-gray-100 dark:bg-dark-raised rounded-lg">
+                      <Icon size={18} className="text-gray-500 dark:text-dark-text-muted" />
                     </div>
-                    <Switch
-                      className="cursor-pointer"
-                      checked={formData[key as keyof typeof formData] as boolean}
-                      onCheckedChange={(checked) => setFormData({ ...formData, [key]: checked })}
-                    />
+                    <label className="text-sm font-medium dark:text-dark-text-secondary">{label}</label>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Contraseña */}
-            <div className="bg-white dark:bg-dark-card border border-gray-200 dark:border-white/[0.07] rounded-xl p-6 space-y-3">
-              <div className="space-y-2">
-                <label className="text-sm font-medium dark:text-dark-text-secondary">Nueva Contraseña</label>
-                <div className="relative">
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Ingresa la Nueva Contraseña"
-                    className="pr-9 dark:bg-dark-raised dark:border-white/[0.07] dark:text-dark-text-primary dark:placeholder:text-dark-text-disabled"
+                  <Switch
+                    className="cursor-pointer"
+                    checked={formData[key as keyof typeof formData] as boolean}
+                    onCheckedChange={(checked) => setFormData({ ...formData, [key]: checked })}
                   />
-                  <div
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-2 flex items-center cursor-pointer text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text-secondary"
-                  >
-                    {showPassword ? <EyeIcon size={16} /> : <EyeSlashIcon size={16} />}
-                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Contraseña */}
+          <div className="bg-white flex-1 dark:bg-dark-card border border-gray-200 dark:border-white/7 rounded-xl p-6 space-y-3">
+            <div className="space-y-2">
+              <label className="text-sm font-medium dark:text-dark-text-secondary">Nueva Contraseña</label>
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Ingresa la Nueva Contraseña"
+                  className="pr-9 dark:bg-dark-raised dark:border-white/[0.07] dark:text-dark-text-primary dark:placeholder:text-dark-text-disabled"
+                />
+                <div
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-2 flex items-center cursor-pointer text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text-secondary"
+                >
+                  {showPassword ? <EyeIcon size={16} /> : <EyeSlashIcon size={16} />}
                 </div>
               </div>
-
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="resetTwoFactor"
-                  checked={resetTwoFactor}
-                  onChange={(e) => setResetTwoFactor(e.target.checked)}
-                  className="rounded accent-brand-primary"
-                />
-                <label htmlFor="resetTwoFactor" className="text-sm dark:text-dark-text-secondary">
-                  Resetear 2FA al cambiar contraseña
-                </label>
-              </div>
-
-              <section className="flex flex-row gap-2">
-                <Button
-                  variant="outline"
-                  onClick={handleResetPassword}
-                  disabled={resettingPassword || !newPassword}
-                  className="text-blue-600 border-blue-200 hover:bg-blue-50 dark:text-dark-text-secondary dark:border-white/[0.07] dark:hover:bg-dark-raised"
-                >
-                  {resettingPassword ? "Cambiando..." : "Cambiar Contraseña"}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleReset2FA}
-                  disabled={resetting2FA}
-                  className="text-orange-600 border-orange-200 hover:bg-orange-50 dark:text-dark-text-secondary dark:border-white/[0.07] dark:hover:bg-dark-raised"
-                >
-                  {resetting2FA ? "Resetando..." : "Resetear 2FA"}
-                </Button>
-              </section>
             </div>
 
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="resetTwoFactor"
+                checked={resetTwoFactor}
+                onChange={(e) => setResetTwoFactor(e.target.checked)}
+                className="rounded accent-brand-primary"
+              />
+              <label htmlFor="resetTwoFactor" className="text-sm dark:text-dark-text-secondary">
+                Resetear 2FA al cambiar contraseña
+              </label>
+            </div>
+
+            <section className="flex flex-row gap-2">
+              <Button
+                variant="outline"
+                onClick={handleResetPassword}
+                disabled={resettingPassword || !newPassword}
+                className="text-blue-600 border-blue-200 hover:bg-blue-50 dark:text-dark-text-secondary dark:border-white/[0.07] dark:hover:bg-dark-raised"
+              >
+                {resettingPassword ? "Cambiando..." : "Cambiar Contraseña"}
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleReset2FA}
+                disabled={resetting2FA}
+              >
+                {resetting2FA ? "Resetando..." : "Resetear 2FA"}
+              </Button>
+
+              {!formData.isMasterAdmin && (
+                <Button
+                  variant="destructive"
+                  onClick={handleDeleteUser}
+                  disabled={formData.isMasterAdmin || deleteUser}
+                >
+                  {deleteUser ? "Eliminando..." : "Eliminar Usuario"}
+                </Button>
+              )}
+            </section>
           </div>
+
         </section>
       </div>
 
