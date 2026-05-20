@@ -200,14 +200,15 @@ export default function OrderDetailPage() {
     const productsToLoad = orderDetail.lines.map((line) => {
       const product: any = {
         itemCode: line.itemCode,
-        itemName: line.itemDescription || "",
-        barcode: line.barCode,
-        priceList: line.priceList,
-        priceAfterVAT: line.priceAfterVAT,
+        itemName: line.itemName,
         quantity: line.quantity,
+        unitPriceNoVAT: line.unitPriceNoVAT,
+        basePriceNoVAT: line.basePriceNoVAT,
         taxCode: line.taxCode,
+        warehouseCode: line.warehouseCode
       }
       if (line.barCode) product.barCode = line.barCode
+      if (line.priceList) product.priceList = line.priceList
       if (line.priceAfterVAT) product.priceAfterVAT = line.priceAfterVAT
       return product
     })
@@ -229,7 +230,7 @@ export default function OrderDetailPage() {
   return (
     <div className="min-h-fit md:p-8">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-white/80 dark:bg-[#171717]/80 backdrop-blur-md border-b border-gray-100 dark:border-white/6">
+      <div className="sticky top-0 z-10 bg-white/80 dark:dark:bg-dark-page/80 backdrop-blur-md border-b border-gray-100 dark:border-white/6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
           {/* Breadcrumb */}
           <nav className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500 mb-2">
@@ -264,7 +265,7 @@ export default function OrderDetailPage() {
                     {({ loading }: { loading: boolean }) => (
                       <button
                         disabled={loading}
-                        className="cursor-pointer flex items-center justify-center gap-2 px-3.5 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-white dark:bg-[#1f1f1f] border border-gray-200 dark:border-white/[0.07] rounded-xl hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-all disabled:opacity-50"
+                        className="cursor-pointer flex items-center justify-center gap-2 px-3.5 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-white dark:bg-dark-card border border-gray-200 dark:border-white/[0.07] rounded-xl hover:bg-gray-50 dark:hover:bg-dark-raised transition-all disabled:opacity-50"
                       >
                         <Download size={16} />
                         <span className="hidden sm:inline">{loading ? 'Generando...' : 'Descargar'}</span>
@@ -282,7 +283,7 @@ export default function OrderDetailPage() {
                         console.error('Error generating PDF:', err)
                       }
                     }}
-                    className="cursor-pointer flex items-center justify-center gap-2 px-3.5 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-white dark:bg-[#1f1f1f] border border-gray-200 dark:border-white/[0.07] rounded-xl hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-all"
+                    className="cursor-pointer flex items-center justify-center gap-2 px-3.5 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-white dark:bg-dark-card border border-gray-200 dark:border-white/[0.07] rounded-xl hover:bg-gray-50 dark:hover:bg-dark-raised transition-all"
                   >
                     <Printer size={16} />
                     <span className="hidden sm:inline">Imprimir</span>
@@ -311,7 +312,7 @@ export default function OrderDetailPage() {
                 { label: 'Vendedor', value: orderDetail.salesPersonName, icon: User },
                 { label: 'RTN', value: orderDetail.federalTaxID || 'Consumidor Final', icon: FileText },
               ].map((item, i) => (
-                <div key={i} className="bg-white dark:bg-[#1f1f1f] p-4 rounded-2xl border border-gray-200 dark:border-white/[0.07] transition-colors">
+                <div key={i} className="bg-white dark:bg-dark-card p-4 rounded-2xl border border-gray-200 dark:border-white/[0.07] transition-colors">
                   <div className="flex items-center gap-2 mb-1.5 text-brand-primary">
                     <item.icon size={14} />
                     <span className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
@@ -324,12 +325,12 @@ export default function OrderDetailPage() {
             </div>
 
             {/* Products Table */}
-            <div className="bg-white dark:bg-[#1f1f1f] rounded-2xl border border-gray-200 dark:border-white/[0.07] overflow-hidden">
+            <div className="bg-white dark:bg-dark-card rounded-2xl border border-gray-200 dark:border-white/[0.07] overflow-hidden">
               <div className="px-5 py-3.5 border-b border-gray-100 dark:border-white/6 flex items-center justify-between">
                 <h3 className="font-bold text-sm text-gray-900 dark:text-gray-100 flex items-center gap-2">
                   <Package size={16} className="text-gray-400 dark:text-gray-500" />
                   Productos
-                  <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-[#2a2a2a] px-2 py-0.5 rounded-full">
+                  <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-dark-raised px-2 py-0.5 rounded-full">
                     {orderDetail.lines.length}
                   </span>
                 </h3>
@@ -355,10 +356,10 @@ export default function OrderDetailPage() {
                         <TableCell className="text-center text-xs text-gray-300 dark:text-gray-600 font-medium">{idx + 1}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-3">
-                            <div className="size-10 rounded-lg bg-gray-50 dark:bg-[#2a2a2a] border border-gray-100 dark:border-white/6 overflow-hidden shrink-0 flex items-center justify-center">
+                            <div className="size-10 rounded-lg bg-gray-50 dark:bg-dark-raised border border-gray-100 dark:border-white/6 overflow-hidden shrink-0 flex items-center justify-center">
                               <NextImage
                                 src={`${IMG_BASE}/${line.itemCode}.jpg`}
-                                alt={line.itemDescription}
+                                alt={line.itemName}
                                 width={40}
                                 height={40}
                                 className="object-contain"
@@ -367,7 +368,7 @@ export default function OrderDetailPage() {
                             </div>
                             <div className="min-w-0">
                               <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-tight truncate">
-                                {line.itemDescription}
+                                {line.itemName}
                               </p>
                               <p className="text-[11px] font-mono text-gray-400 dark:text-gray-500 mt-0.5">{line.itemCode}</p>
                             </div>
@@ -379,10 +380,10 @@ export default function OrderDetailPage() {
                           </span>
                         </TableCell>
                         <TableCell className="text-right text-sm text-gray-500 dark:text-gray-400 tabular-nums">
-                          L <PriceDisplay decimalNum={2} price={line.priceAfterVAT ?? 0} />
+                          L <PriceDisplay decimalNum={2} price={line.unitPriceNoVAT ?? 0} />
                         </TableCell>
                         <TableCell className="text-right text-sm font-semibold text-gray-900 dark:text-gray-100 tabular-nums">
-                          L <PriceDisplay decimalNum={2} price={(line.priceAfterVAT ?? 0) * line.quantity} />
+                          L <PriceDisplay decimalNum={2} price={(line.unitPriceNoVAT ?? 0) * line.quantity} />
                         </TableCell>
                       </TableRow>
                     ))}
@@ -395,7 +396,7 @@ export default function OrderDetailPage() {
           {/* Right Column - Sidebar */}
           <div className="lg:col-span-4 space-y-5 lg:sticky lg:top-28">
             {/* Client Card */}
-            <div className="bg-white dark:bg-[#1f1f1f] rounded-2xl border border-gray-200 dark:border-white/[0.07] p-5">
+            <div className="bg-white dark:bg-dark-card rounded-2xl border border-gray-200 dark:border-white/[0.07] p-5">
               <div className="flex items-center gap-3 mb-4">
                 <Avvvatars size={44} value={orderDetail.cardName} style="character" />
                 <div className="overflow-hidden flex-1">
@@ -406,7 +407,7 @@ export default function OrderDetailPage() {
                 </div>
               </div>
 
-              <div className="bg-gray-50 dark:bg-[#2a2a2a] p-3.5 rounded-xl space-y-3">
+              <div className="bg-gray-50 dark:bg-dark-raised p-3.5 rounded-xl space-y-3">
                 <div>
                   <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1 flex items-center gap-1">
                     <MapPin size={10} /> Dirección de Entrega
@@ -423,7 +424,7 @@ export default function OrderDetailPage() {
             </div>
 
             {/* Comments */}
-            <div className="bg-white dark:bg-[#1f1f1f] border border-gray-200 dark:border-white/[0.07] p-4 rounded-2xl flex gap-3">
+            <div className="bg-white dark:bg-dark-card border border-gray-200 dark:border-white/[0.07] p-4 rounded-2xl flex gap-3">
               <MessageSquareText size={16} className="text-gray-300 dark:text-gray-600 shrink-0 mt-0.5" />
               <div>
                 <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Comentarios</p>
@@ -434,7 +435,7 @@ export default function OrderDetailPage() {
             </div>
 
             {/* Totals Card */}
-            <div className="bg-gray-900 dark:bg-[#1f1f1f] rounded-2xl p-5 text-white dark:border dark:border-white/[0.07]">
+            <div className="bg-gray-900 dark:bg-dark-card rounded-2xl p-5 text-white dark:border dark:border-white/[0.07]">
               <h3 className="text-[10px] font-semibold text-gray-500 mb-4 uppercase tracking-widest flex items-center gap-2">
                 <Coins size={14} /> Resumen del Pedido
               </h3>

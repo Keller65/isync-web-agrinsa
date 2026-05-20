@@ -299,7 +299,7 @@ export default function OrdersPage() {
   });
 
   return (
-    <div className="flex-1 min-h-screen p-4 sm:p-6 bg-gray-50/50 dark:dark:bg-[#171717]">
+    <div className="flex-1 min-h-screen p-4 sm:p-6 bg-gray-50/50 dark:dark:bg-dark-page">
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Oferta</h2>
@@ -600,7 +600,7 @@ export default function OrdersPage() {
           <div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
               {filteredOrders.map((item) => (
-                <div className="bg-white dark:bg-[#1f1f1f] rounded-2xl p-5 border border-gray-200 dark:border-white/[0.07] overflow-hidden hover:border-gray-300 dark:hover:border-white/12 transition-colors h-full">
+                <div className="bg-white dark:bg-dark-card rounded-2xl p-5 border border-gray-200 dark:border-white/[0.07] overflow-hidden hover:border-gray-300 dark:hover:border-white/12 transition-colors h-full">
 
                   {/* Header */}
                   <div className="flex items-center justify-between mb-4">
@@ -620,7 +620,7 @@ export default function OrdersPage() {
 
                   {/* Cliente */}
                   <div className="flex items-start gap-3 mb-4">
-                    <div className="bg-gray-100 dark:bg-[#2a2a2a] size-10 rounded-full overflow-hidden shrink-0">
+                    <div className="bg-gray-100 dark:bg-dark-raised size-10 rounded-full overflow-hidden shrink-0">
                       <Avvvatars value={item.cardName} size={40} />
                     </div>
                     <div className="flex-1 overflow-hidden">
@@ -634,7 +634,7 @@ export default function OrdersPage() {
                   {/* Stats */}
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-start gap-2">
-                      <div className="bg-gray-100 dark:bg-[#2a2a2a] p-1.5 rounded-full">
+                      <div className="bg-gray-100 dark:bg-dark-raised p-1.5 rounded-full">
                         <CalendarDots size={16} className="text-gray-600 dark:text-gray-500" />
                       </div>
                       <div>
@@ -645,7 +645,7 @@ export default function OrdersPage() {
                       </div>
                     </div>
                     <div className="flex items-start gap-2">
-                      <div className="bg-gray-100 dark:bg-[#2a2a2a] p-1.5 rounded-full">
+                      <div className="bg-gray-100 dark:bg-dark-raised p-1.5 rounded-full">
                         <Coins size={16} className="text-gray-600 dark:text-gray-500" />
                       </div>
                       <div>

@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { useCustomerStore } from '@/lib/store/store.customer'
 import { useCartStore } from '@/lib/store/store.cart'
 import { X, Plus, Edit3, AlertCircle, Trash } from "lucide-react"
-import { Pen, ShoppingCart, MapPinLine } from "@phosphor-icons/react"
+import { PenIcon, ShoppingCartIcon, MapPinLine } from "@phosphor-icons/react"
 import Image from "next/image"
 import Link from "next/link"
 import axios from "axios"
@@ -254,7 +254,7 @@ function CartISync() {
         <DrawerTrigger asChild>
           <span className="relative mr-3 cursor-pointer">
             {productsInCart.length > 0 &&
-              (editMode ? <Pen size={24} /> : <ShoppingCart size={24} />)}
+              (editMode ? <PenIcon size={24} /> : <ShoppingCartIcon size={24} />)}
             {productsInCart.length > 0 && (
               <Badge className="absolute -top-2 -right-4 size-5 grid place-content-center text-[10px]">
                 {productsInCart.length}
