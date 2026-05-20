@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import axios from "axios"
-import { PencilSimple, Plus, User as UserIcon } from "@phosphor-icons/react"
+import { EyeIcon, EyeSlashIcon, PencilSimple, Plus, User as UserIcon } from "@phosphor-icons/react"
 import Avvvatars from "avvvatars-react"
 import {
   Dialog,
@@ -32,6 +32,7 @@ interface UserData {
 export default function Page() {
   const router = useRouter()
   const { data: session } = useSession()
+  const [showPassword, setShowPassword] = useState(false)
   const token = session?.user?.token ?? null
   const [users, setUsers] = useState<UserData[]>([])
   const [loading, setLoading] = useState(true)
@@ -84,7 +85,7 @@ export default function Page() {
   }
 
   const handleCreateUser = async () => {
-    if (!token || !createForm.username || !createForm.email || !createForm.password) {
+    if (!token || !createForm.username || !createForm.password) {
       return
     }
 
@@ -237,12 +238,20 @@ export default function Page() {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Contraseña</label>
-              <Input
-                type="password"
-                value={createForm.password}
-                onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  value={createForm.password}
+                  onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
+                  placeholder="••••••••"
+                />
+                <div
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-2 flex items-center cursor-pointer text-gray-400 dark:text-dark-text-muted hover:text-gray-600 dark:hover:text-dark-text-secondary"
+                >
+                  {showPassword ? <EyeIcon size={16} /> : <EyeSlashIcon size={16} />}
+                </div>
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -284,7 +293,7 @@ export default function Page() {
             </Button>
             <Button
               onClick={handleCreateUser}
-              disabled={creating || !createForm.username || !createForm.email || !createForm.password}
+              disabled={creating || !createForm.username || !createForm.password}
               className="flex-1"
             >
               {creating ? "Creando..." : "Crear usuario"}
