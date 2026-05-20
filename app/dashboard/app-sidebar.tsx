@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
 import Avvvatars from "avvvatars-react"
-import { Cardholder, ChartLineUp, ShoppingCart, CaretUpDown, SignOut, Path, Books, FileCsvIcon, GpsFixIcon, ClockCounterClockwiseIcon, UsersIcon, GearSixIcon } from "@phosphor-icons/react"
+import { Cardholder, ChartLineUp, ShoppingCart, CaretUpDown, SignOut, Path, Books, FileCsvIcon, GpsFixIcon, ClockCounterClockwiseIcon, UsersIcon, GearSixIcon, CaretUpDownIcon } from "@phosphor-icons/react"
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarGroup, SidebarGroupLabel, useSidebar } from "@/components/ui/sidebar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger, } from "@/components/ui/collapsible"
@@ -177,14 +177,10 @@ export function AppSidebar() {
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-semibold">{session?.user?.fullName}</span>
                     <span className="truncate text-xs text-muted-foreground">
-                      {session?.user?.isMasterAdmin == null
-                        ? "Cargando..."
-                        : session.user.isMasterAdmin
-                          ? "Usuario Administrador"
-                          : "Vendedor iSync"}
+                      {session?.user?.isMasterAdmin == null ? "Cargando..." : session.user.isMasterAdmin ? "Usuario Administrador" : "Vendedor iSync"}
                     </span>
                   </div>
-                  <CaretUpDown size={16} className="ml-auto" />
+                  <CaretUpDownIcon size={16} className="ml-auto" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg" side="top" align="end">
