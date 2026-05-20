@@ -2,20 +2,20 @@
 
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 import axios from 'axios';
 import { AlertCircle, Loader2, RefreshCw, TrendingUp, Plus, Search, ArrowRight, MapPin, Check } from 'lucide-react';
-import { useAuthStore } from '@/lib/store';
 import { useCustomerStore } from '@/lib/store/store.customer';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, } from "@/components/ui/alert-dialog";
 import { CustomerType, CustomerResponseType, CustomerAddress } from '@/types/customers';
 import { Input } from "@/components/ui/input";
-import { ArrowClockwise, CalendarDots, Coins } from '@phosphor-icons/react';
+import { ArrowClockwise, CalendarDots, Coins, FileText } from '@phosphor-icons/react';
 import Avvvatars from 'avvvatars-react';
 import { useCartStore } from '@/lib/store/store.cart';
 import { Button } from '@/components/ui/button';
 import { logClient } from '@/lib/logger/logger.client';
+import { useSession } from 'next-auth/react';
 
 interface OrderDataType {
   docEntry: number;
@@ -35,13 +35,13 @@ interface OrderDataType {
 
 export default function OrdersPage() {
   const router = useRouter();
-  const pathname = usePathname();
   const [orderData, setOrderData] = useState<OrderDataType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [page, setPage] = useState(1);
   const [isLastPage, setIsLastPage] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuotation, setSearchQuotation] = useState('');
   const { productsInCart, removeProduct } = useCartStore();
 
   const [customers, setCustomers] = useState<CustomerType[]>([]);
@@ -59,8 +59,8 @@ export default function OrdersPage() {
   const isLoadingRef = useRef(false);
   const isLastPageRef = useRef(false);
   const isLastCustomerPageRef = useRef(false);
-  const prevTokenRef = useRef<string | null>(null);
-  const { salesPersonCode, token, fullName } = useAuthStore();
+  const { data: session } = useSession();
+
   const {
     setSelectedCustomer,
     selectedCustomer,
@@ -79,7 +79,7 @@ export default function OrdersPage() {
   const [isLoadingAddresses, setIsLoadingAddresses] = useState(false);
 
   const fetchOrders = useCallback(async (pageToFetch: number, isRefresh = false) => {
-    if (!salesPersonCode || !token) {
+    if (!session?.user || !session?.user.token) {
       setError('Datos de autenticación no disponibles');
       return;
     }
@@ -98,10 +98,10 @@ export default function OrdersPage() {
 
     try {
       const res = await axios.get(
-        `${FETCH_URL}/${salesPersonCode}?page=${pageToFetch}&pageSize=${PAGE_SIZE}`,
+        `${FETCH_URL}/${session?.user.salesPersonCode}?page=${pageToFetch}&pageSize=${PAGE_SIZE}`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${session?.user.token}`,
             'Content-Type': 'application/json',
           },
         }
@@ -125,12 +125,12 @@ export default function OrdersPage() {
       logClient({
         level: 'ERROR',
         category: 'PEDIDO',
-        endpoint: `${FETCH_URL}/${salesPersonCode}`,
+        endpoint: `${FETCH_URL}/${!session?.user.salesPersonCode}`,
         errorCode: err.response?.status,
         message,
         responseBody: err.response?.data,
         pageUrl: '/dashboard/orders',
-        userId: fullName ?? undefined,
+        userId: session?.user.fullName ?? undefined,
       });
     } finally {
       isLoadingRef.current = false;
@@ -140,21 +140,21 @@ export default function OrdersPage() {
         setIsLoading(false);
       }
     }
-  }, [FETCH_URL, token, salesPersonCode, fullName]);
+  }, [FETCH_URL, !session?.user.token, !session?.user.salesPersonCode, session?.user.fullName]);
 
   const fetchCustomers = useCallback(async (pageToFetch = 1, isRefresh = false) => {
-    if (!salesPersonCode || !token) return;
+    if (!session?.user.salesPersonCode || !session?.user.token) return;
     if (!isRefresh && isLastCustomerPageRef.current) return;
 
     const searchValue = customerSearchRef.current;
     const searchParam = searchValue.trim() ? `&search=${encodeURIComponent(searchValue.trim())}` : '';
-    const url = `${CUSTOMERS_URL}?${searchParam}&page=${pageToFetch}&pageSize=1000`;
+    const url = `${CUSTOMERS_URL}?slpCode=${searchParam}&page=${pageToFetch}&pageSize=${CUSTOMER_PAGE_SIZE}`;
 
     setIsLoadingCustomers(true);
     try {
       const res = await axios.get<CustomerResponseType>(url, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${session?.user.token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -178,15 +178,15 @@ export default function OrdersPage() {
         message: err.response?.data?.message || err.response?.data?.error || 'Error al cargar clientes',
         responseBody: err.response?.data,
         pageUrl: '/dashboard/orders',
-        userId: fullName ?? undefined,
+        userId: session?.user.fullName ?? undefined,
       });
     } finally {
       setIsLoadingCustomers(false);
     }
-  }, [CUSTOMERS_URL, salesPersonCode, token]);
+  }, [CUSTOMERS_URL, session?.user.salesPersonCode, session?.user.token]);
 
   const fetchAddresses = useCallback(async (cardCode: string) => {
-    if (!token) return;
+    if (!session?.user.token) return;
 
     setIsLoadingAddresses(true);
     try {
@@ -194,7 +194,7 @@ export default function OrdersPage() {
         `${ADDRESSES_URL}/${cardCode}/addresses`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${session?.user.token}`,
             'Content-Type': 'application/json',
           },
         }
@@ -214,14 +214,14 @@ export default function OrdersPage() {
         message: err.response?.data?.message || err.response?.data?.error || 'Error al cargar direcciones',
         responseBody: err.response?.data,
         pageUrl: '/dashboard/orders',
-        userId: fullName ?? undefined,
+        userId: session?.user.fullName ?? undefined,
       });
       setAddresses([]);
       setSelectedAddress(null);
     } finally {
       setIsLoadingAddresses(false);
     }
-  }, [ADDRESSES_URL, token, setAddresses, setSelectedAddress]);
+  }, [ADDRESSES_URL, session?.user.token, setAddresses, setSelectedAddress]);
 
   const handleRefresh = useCallback(() => {
     setPage(1);
@@ -278,16 +278,10 @@ export default function OrdersPage() {
   }, [isDialogOpen, isLoadingCustomers, isLastCustomerPage, customerPage, fetchCustomers]);
 
   useEffect(() => {
-    if (salesPersonCode && token) {
-      if (prevTokenRef.current === null && token) {
-        prevTokenRef.current = token;
-        fetchOrders(1, true);
-      } else if (prevTokenRef.current !== token) {
-        prevTokenRef.current = token;
-        fetchOrders(1, true);
-      }
+    if (session?.user.salesPersonCode && session?.user.token) {
+      fetchOrders(1, true);
     }
-  }, [salesPersonCode, token, fetchOrders, pathname]);
+  }, [session?.user.salesPersonCode, session?.user.token, fetchOrders]);
 
   useEffect(() => {
     if (selectedCustomer) {
@@ -295,17 +289,40 @@ export default function OrdersPage() {
     }
   }, [selectedCustomer, fetchAddresses]);
 
+  const filteredOrders = orderData.filter((order) => {
+    const search = searchQuotation.toLowerCase();
+    return (
+      order.cardName.toLowerCase().includes(search) ||
+      order.cardCode.toLowerCase().includes(search) ||
+      order.docNum.toString().includes(search)
+    );
+  });
+
   return (
-    <div className="flex-1 min-h-screen p-4 sm:p-6 bg-gray-50/50">
+    <div className="flex-1 min-h-screen p-4 sm:p-6 bg-gray-50/50 dark:dark:bg-[#171717]">
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Cotizaciones</h2>
-          <p className="text-sm text-gray-500 mt-0.5">
-            {orderData.length > 0 ? `${orderData.length} cotizaciones cargadas` : 'Historial reciente de cotizaciones'}
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Oferta</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-300 mt-0.5">
+            {orderData.length > 0
+              ? searchQuotation
+                ? `${filteredOrders.length} de ${orderData.length} Oferta`
+                : `${orderData.length} Oferta cargadas`
+              : 'Historial reciente de Oferta'}
           </p>
         </div>
 
         <div className="flex items-center gap-2">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={15} />
+            <Input
+              placeholder="Buscar Oferta..."
+              className="pl-9 h-9 w-48 bg-white border-gray-200 text-sm rounded-full"
+              value={searchQuotation}
+              onChange={(e) => setSearchQuotation(e.target.value)}
+            />
+          </div>
+
           <Button
             variant="outline"
             size="sm"
@@ -322,7 +339,7 @@ export default function OrdersPage() {
               <DialogTrigger asChild>
                 <Button size="sm" className="gap-2 rounded-full bg-brand-primary hover:bg-brand-primary/90 text-white">
                   <Plus size={15} />
-                  Nueva Cotización
+                  Nueva Oferta
                 </Button>
               </DialogTrigger>
             )}
@@ -415,7 +432,7 @@ export default function OrdersPage() {
                         }}
                         className="w-full bg-brand-primary cursor-pointer text-white text-sm font-semibold h-11 rounded-full transition-all hover:bg-brand-primary/90 flex items-center justify-center gap-2"
                       >
-                        {addresses.length > 0 ? 'Realizar Cotización' : 'Continuar sin Ubicación'}
+                        {addresses.length > 0 ? 'Realizar Oferta' : 'Continuar sin Ubicación'}
                         <ArrowRight size={16} />
                       </button>
                     </div>
@@ -467,11 +484,11 @@ export default function OrdersPage() {
                               type="button"
                               onClick={() => {
                                 if (!isSelected) {
-                                  if (salesPersonCode && customer.slpCode && salesPersonCode !== customer.slpCode) {
+                                  if (session?.user.salesPersonCode && customer.slpCode && session?.user.salesPersonCode !== customer.slpCode) {
                                     setPendingCustomer(customer);
                                   } else {
                                     setSelectedCustomer(customer);
-                                    logClient({ level: 'INFO', category: 'CLIENTES', message: `Cliente seleccionado: ${customer.cardName} (${customer.cardCode})`, pageUrl: '/dashboard/orders', userId: fullName ?? undefined });
+                                    logClient({ level: 'INFO', category: 'CLIENTES', message: `Cliente seleccionado: ${customer.cardName} (${customer.cardCode})`, pageUrl: '/dashboard/orders', userId: session?.user.fullName ?? undefined });
                                   }
                                 }
                               }}
@@ -533,7 +550,7 @@ export default function OrdersPage() {
                       }}
                       className="w-full bg-brand-primary text-white text-sm font-semibold h-11 rounded-full flex items-center justify-center gap-2"
                     >
-                      {addresses.length > 0 ? 'Realizar Cotización' : 'Continuar sin Ubicación'}
+                      {addresses.length > 0 ? 'Realizar Oferta' : 'Continuar sin Ubicación'}
                       <ArrowRight size={16} />
                     </button>
                   </div>
@@ -582,64 +599,72 @@ export default function OrdersPage() {
         ) : orderData.length > 0 ? (
           <div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-              {orderData.map((item) => (
-                <div
-                  key={item.docEntry}
-                  className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:border-gray-300 hover:shadow-sm transition-all"
-                >
-                  {/* Header de la card */}
-                  <div className="px-5 pt-5 pb-4 flex items-center justify-between">
+              {filteredOrders.map((item) => (
+                <div className="bg-white dark:bg-[#1f1f1f] rounded-2xl p-5 border border-gray-200 dark:border-white/[0.07] overflow-hidden hover:border-gray-300 dark:hover:border-white/12 transition-colors h-full">
+
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-xl bg-brand-primary/10 flex items-center justify-center">
-                        <TrendingUp size={15} className="text-brand-primary" />
-                      </div>
-                      <p className="text-sm text-gray-500">
-                        Cotización <span className="font-bold text-gray-900">#{item.docNum}</span>
+                      <FileText size={20} className="text-gray-700 dark:text-gray-400" />
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Oferta{" "}
+                        <span className="font-semibold text-gray-900 dark:text-gray-100">
+                          #{item.docNum}
+                        </span>
                       </p>
                     </div>
-                    <span className="text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-1 rounded-full">
+                    <span className="text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-400/10 dark:text-amber-400 dark:border-amber-400/20 px-2.5 py-1 rounded-full">
                       En Proceso
                     </span>
                   </div>
 
                   {/* Cliente */}
-                  <div className="px-5 pb-4 flex items-center gap-3">
-                    <Avvvatars size={38} value={item.cardName} style="character" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Cliente</p>
-                      <p className="text-sm font-semibold text-gray-900 truncate leading-tight">{item.cardName}</p>
-                      <p className="text-[11px] text-gray-400 font-mono">{item.cardCode}</p>
+                  <div className="flex items-start gap-3 mb-4">
+                    <div className="bg-gray-100 dark:bg-[#2a2a2a] size-10 rounded-full overflow-hidden shrink-0">
+                      <Avvvatars value={item.cardName} size={40} />
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                      <p className="text-xs text-gray-500 dark:text-gray-500">Cliente</p>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                        {item.cardName}
+                      </p>
                     </div>
                   </div>
 
                   {/* Stats */}
-                  <div className="mx-5 mb-4 grid grid-cols-2 gap-2">
-                    <div className="bg-gray-50 rounded-xl px-3 py-2">
-                      <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1">
-                        <CalendarDots size={11} /> Fecha
-                      </p>
-                      <p className="text-sm font-bold text-gray-800 mt-0.5">
-                        {new Date(item.docDate).toLocaleDateString('es-HN')}
-                      </p>
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-start gap-2">
+                      <div className="bg-gray-100 dark:bg-[#2a2a2a] p-1.5 rounded-full">
+                        <CalendarDots size={16} className="text-gray-600 dark:text-gray-500" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-gray-500 dark:text-gray-500 leading-none">Fecha</p>
+                        <p className="text-xs font-semibold text-gray-900 dark:text-gray-100">
+                          {new Date(item.docDate).toLocaleDateString('es-HN')}
+                        </p>
+                      </div>
                     </div>
-                    <div className="bg-gray-50 rounded-xl px-3 py-2">
-                      <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1">
-                        <Coins size={11} /> Total
-                      </p>
-                      <p className="text-sm font-bold text-gray-800 mt-0.5">
-                        L.{item.docTotal.toLocaleString('es-HN', { minimumFractionDigits: 2 })}
-                      </p>
+                    <div className="flex items-start gap-2">
+                      <div className="bg-gray-100 dark:bg-[#2a2a2a] p-1.5 rounded-full">
+                        <Coins size={16} className="text-gray-600 dark:text-gray-500" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-gray-500 dark:text-gray-500 leading-none">Total</p>
+                        <p className="text-xs font-semibold text-gray-900 dark:text-gray-100">
+                          L.{item.docTotal.toLocaleString('es-HN', { minimumFractionDigits: 2 })}
+                        </p>
+                      </div>
                     </div>
                   </div>
 
                   {/* Footer */}
-                  <div className="px-5 pb-5">
+                  <div className="mt-auto">
                     <button
                       onClick={() => router.push(`/dashboard/orders/${item.docEntry}`)}
                       className="w-full bg-brand-primary hover:bg-brand-primary/90 text-white text-sm font-semibold py-2.5 rounded-full cursor-pointer transition-colors flex items-center justify-center gap-1.5"
                     >
                       Ver detalles
-                      <ArrowRight size={14} />
+                      <ArrowRight color='currentColor' size={14} />
                     </button>
                   </div>
                 </div>
@@ -659,7 +684,7 @@ export default function OrdersPage() {
                       Cargando...
                     </>
                   ) : (
-                    'Cargar más cotizaciones'
+                    'Cargar más Oferta'
                   )}
                 </button>
               </div>
@@ -672,8 +697,8 @@ export default function OrdersPage() {
                 <TrendingUp size={36} className="text-gray-300" />
               </div>
               <div className="text-center">
-                <p className="text-base font-semibold text-gray-700">Sin cotizaciones</p>
-                <p className="text-sm text-gray-400 mt-1">No hay cotizaciones registradas aún.</p>
+                <p className="text-base font-semibold text-gray-700">Sin Oferta</p>
+                <p className="text-sm text-gray-400 mt-1">No hay Oferta registradas aún.</p>
               </div>
               <Button variant="outline" size="sm" className="rounded-full gap-2 border-gray-200" onClick={handleRefresh}>
                 <RefreshCw size={14} />
@@ -689,7 +714,7 @@ export default function OrdersPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Vendedor asignado diferente</AlertDialogTitle>
             <AlertDialogDescription className="whitespace-pre-line">
-              {`Este cliente está asignado a ${pendingCustomer?.slpName}, pero tú estás logueado como ${fullName}.\n\n¿Con cuál vendedor deseas realizar la cotización?`}
+              {`Este cliente está asignado a ${pendingCustomer?.slpName}, pero tú estás logueado como ${session?.user.fullName}.\n\n¿Con cuál vendedor deseas realizar la Oferta?`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -699,7 +724,7 @@ export default function OrdersPage() {
                 setSellerDifferent(true);
                 setSelectedSlpCode(pendingCustomer.slpCode ?? null);
                 setSelectedCustomer(pendingCustomer);
-                logClient({ level: 'INFO', category: 'CLIENTES', message: `Cliente seleccionado con vendedor diferente: ${pendingCustomer.cardName}`, pageUrl: '/dashboard/orders', userId: fullName ?? undefined });
+                logClient({ level: 'INFO', category: 'CLIENTES', message: `Cliente seleccionado con vendedor diferente: ${pendingCustomer.cardName}`, pageUrl: '/dashboard/orders', userId: session?.user.fullName ?? undefined });
                 setPendingCustomer(null);
               }}
             >
@@ -710,13 +735,13 @@ export default function OrdersPage() {
               onClick={() => {
                 if (!pendingCustomer) return;
                 setSellerDifferent(false);
-                setSelectedSlpCode(salesPersonCode);
+                setSelectedSlpCode(session?.user.salesPersonCode != null ? Number(session.user.salesPersonCode) : null);
                 setSelectedCustomer(pendingCustomer);
-                logClient({ level: 'INFO', category: 'CLIENTES', message: `Cliente seleccionado (vendedor propio): ${pendingCustomer.cardName} (${pendingCustomer.cardCode})`, pageUrl: '/dashboard/orders', userId: fullName ?? undefined });
+                logClient({ level: 'INFO', category: 'CLIENTES', message: `Cliente seleccionado (vendedor propio): ${pendingCustomer.cardName} (${pendingCustomer.cardCode})`, pageUrl: '/dashboard/orders', userId: session?.user.fullName ?? undefined });
                 setPendingCustomer(null);
               }}
             >
-              Con {fullName}
+              Con {session?.user.fullName}
             </AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>

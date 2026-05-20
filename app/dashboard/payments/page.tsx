@@ -1,10 +1,11 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import axios from "axios"
-import { useAuthStore } from '@/lib/store'
-import { usePathname } from "next/navigation"
+import { useInvoiceStore } from '@/lib/store/store.invoice'
 import { Payment } from '@/types/payments'
+import { CustomerType } from '@/types/customers'
 import {
   FileText,
   CalendarDots,
@@ -17,25 +18,31 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import Avvvatars from "avvvatars-react"
 import Link from "next/link"
+import { CustomerSelectionDialog } from "@/components/payments/CustomerSelectionDialog"
+import { PendingInvoicesModal } from "@/components/payments/PendingInvoicesModal"
+import { useSession } from "next-auth/react"
 
 export default function PaymentsPage() {
   const [payments, setPayments] = useState<Payment[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
-  const { token, salesPersonCode } = useAuthStore()
-  const pathname = usePathname()
-  const prevTokenRef = useRef<string | null>(null)
+  // Customer selection state
+  const [customerDialogOpen, setCustomerDialogOpen] = useState(false)
+  const [invoicesModalOpen, setInvoicesModalOpen] = useState(false)
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerType | null>(null)
+
+  const router = useRouter()
+  const { data: session } = useSession();
+  const { selectedInvoices, clearInvoices } = useInvoiceStore()
 
   const fetchPayments = async () => {
-    if (!token || !salesPersonCode) return
-
     setIsLoading(true)
     try {
       const { data } = await axios.get(
-        `/api-proxy/api/Payments/received/${salesPersonCode}?page=1&pageSize=20`,
+        `/api-proxy/api/Payments/received/${session?.user.salesPersonCode}?page=1&pageSize=20`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${session?.user.token}`,
           },
         }
       )
@@ -46,20 +53,25 @@ export default function PaymentsPage() {
   }
 
   useEffect(() => {
-    if (token && salesPersonCode) {
-      if (prevTokenRef.current === null && token) {
-        prevTokenRef.current = token;
-        fetchPayments();
-      } else if (prevTokenRef.current !== token) {
-        prevTokenRef.current = token;
-        fetchPayments();
-      }
+    fetchPayments()
+  }, [session?.user.token, session?.user.salesPersonCode])
+
+  const handleSelectCustomer = (customer: CustomerType) => {
+    clearInvoices()
+    setSelectedCustomer(customer)
+    setInvoicesModalOpen(true)
+  }
+
+  const handleContinueToPayment = () => {
+    if (selectedCustomer) {
+      setInvoicesModalOpen(false)
+      router.push(`/dashboard/payments/new?cardCode=${selectedCustomer.cardCode}&cardName=${encodeURIComponent(selectedCustomer.cardName)}`)
     }
-  }, [token, salesPersonCode, pathname])
+  }
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-4 md:p-6">
+      <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between mb-6">
         <div>
           <h2 className="text-lg font-semibold text-gray-900">
             Pagos recibidos
@@ -81,7 +93,12 @@ export default function PaymentsPage() {
             Actualizar
           </Button>
 
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() => setCustomerDialogOpen(true)}
+          >
             <Plus size={16} />
             Realizar pago
           </Button>
@@ -107,7 +124,7 @@ export default function PaymentsPage() {
             <Link
               key={item.docEntry}
               href={`/dashboard/payments/${item.docEntry}`}
-              className="bg-white rounded-2xl p-5 border border-gray-200 block hover:border-gray-300 transition-colors"
+              className="bg-white dark:bg-[#141414] rounded-2xl p-5 border border-gray-200 block hover:border-gray-300 transition-colors"
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
@@ -185,6 +202,22 @@ export default function PaymentsPage() {
             Los pagos aparecerán aquí automáticamente
           </p>
         </div>
+      )}
+
+      <CustomerSelectionDialog
+        open={customerDialogOpen}
+        onOpenChange={setCustomerDialogOpen}
+        onSelectCustomer={handleSelectCustomer}
+      />
+
+      {selectedCustomer && (
+        <PendingInvoicesModal
+          open={invoicesModalOpen}
+          onOpenChange={setInvoicesModalOpen}
+          customerCode={selectedCustomer.cardCode}
+          customerName={selectedCustomer.cardName}
+          onContinue={handleContinueToPayment}
+        />
       )}
     </div>
   )

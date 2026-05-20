@@ -1,40 +1,32 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
-import { useParams, usePathname } from "next/navigation"
+import { useEffect, useState, useCallback } from "react"
+import { useParams } from "next/navigation"
 import axios from "axios"
 import Link from "next/link"
-import { useAuthStore } from '@/lib/store'
+import { useSession } from "next-auth/react"
 import { Payment } from '@/types/payments'
-import { ArrowLeft, CalendarDots, Coins, CreditCard, FileText, Receipt, Bank, Hash, Info, } from "@phosphor-icons/react"
+import { ArrowLeft, CalendarDots, Coins, CreditCard, FileText, Receipt, Bank, Hash, Info, Printer, DownloadSimple as DownloadSimpleIcon } from "@phosphor-icons/react"
 import Avvvatars from "avvvatars-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { PDFDownloadLink, pdf } from '@react-pdf/renderer'
+import { PaymentReceiptPDF } from '@/components/pdf/PaymentReceiptPDF'
 
 export default function PaymentPage() {
   const [payment, setPayment] = useState<Payment | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isGenerating, setIsGenerating] = useState(false)
 
-  const { token } = useAuthStore()
+  const { data: session } = useSession()
+  const token = session?.user?.token ?? null
   const { docEntry } = useParams()
-  const pathname = usePathname()
-  const prevTokenRef = useRef<string | null>(null)
 
   useEffect(() => {
-    if (token && docEntry) {
-      if (prevTokenRef.current === null && token) {
-        prevTokenRef.current = token;
-        fetchPayment();
-      } else if (prevTokenRef.current !== token) {
-        prevTokenRef.current = token;
-        fetchPayment();
-      }
-    }
+    if (!docEntry || !token) return
 
-    async function fetchPayment() {
-      if (!docEntry || !token) return
-
+    const fetchPayment = async () => {
       setIsLoading(true)
       try {
         const { data } = await axios.get(
@@ -46,11 +38,27 @@ export default function PaymentPage() {
         setIsLoading(false)
       }
     }
-  }, [docEntry, token, pathname])
+
+    fetchPayment()
+  }, [docEntry, token])
+
+  const handlePrint = useCallback(async () => {
+    if (!payment) return
+    setIsGenerating(true)
+    try {
+      const blob = await pdf(<PaymentReceiptPDF payment={payment} />).toBlob()
+      const url = URL.createObjectURL(blob)
+      window.open(url, '_blank')
+    } catch (err) {
+      console.error('Error generating PDF:', err)
+    } finally {
+      setIsGenerating(false)
+    }
+  }, [payment])
 
   if (isLoading) {
     return (
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-5xl mx-auto space-y-6 p-4">
         <Skeleton className="h-6 w-1/3" />
         <Skeleton className="h-4 w-1/2" />
         <Skeleton className="h-64 w-full rounded-xl" />
@@ -75,14 +83,58 @@ export default function PaymentPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto py-8">
-      <Link
-        href="/dashboard/payments"
-        className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 mb-6"
-      >
-        <ArrowLeft size={16} />
-        Pagos
-      </Link>
+    <div className="max-w-5xl mx-auto p-4 md:py-8">
+      <div className="flex items-center justify-between mb-6">
+        <Link
+          href="/dashboard/payments"
+          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900"
+        >
+          <ArrowLeft size={16} />
+          Pagos
+        </Link>
+
+        {payment && (
+          <div className="flex items-center gap-2">
+            <PDFDownloadLink
+              document={<PaymentReceiptPDF payment={payment} />}
+              fileName={`RECIBO-PAGO-${payment.docNum}-${payment.cardName}.pdf`}
+              className="cursor-pointer flex items-center justify-center gap-2 px-3.5 py-2 text-sm font-medium text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all"
+            >
+              {({ loading }) =>
+                loading ? (
+                  <>
+                    <DownloadSimpleIcon size={16} />
+                    Generando...
+                  </>
+                ) : (
+                  <>
+                    <DownloadSimpleIcon size={16} />
+                    Descargar
+                  </>
+                )
+              }
+            </PDFDownloadLink>
+
+            <button
+              onClick={handlePrint}
+              disabled={isGenerating}
+              className="cursor-pointer flex items-center justify-center gap-2 px-3.5 py-2 text-sm font-medium text-white bg-brand-primary rounded-xl hover:bg-brand-primary/90 transition-all disabled:opacity-50"
+            >
+              {isGenerating ? (
+                <>
+                  <Printer size={16} />
+                  Generando...
+                </>
+              ) : (
+                <>
+                  <Printer size={16} />
+                  Imprimir
+                </>
+              )}
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Header */}
       <div className="mb-8">

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, cloneElement } from "react"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { toast } from "sonner"
@@ -13,19 +14,20 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { useAuthStore } from '@/lib/store'
+import { useSession } from "next-auth/react"
 import { useSettingsStore } from '@/lib/store/store.general'
 import { cn } from "@/lib/utils"
 
 const navItems = [
   { id: "notifications", label: "Notificaciones", icon: Bell },
-  { id: "system",        label: "Sistema y Datos", icon: Cpu },
-  { id: "security",      label: "Cuenta y Seguridad", icon: Shield },
+  { id: "system", label: "Sistema y Datos", icon: Cpu },
+  { id: "security", label: "Cuenta y Seguridad", icon: Shield },
 ]
 
 export default function SettingsPage() {
   const router = useRouter()
-  const { fullName } = useAuthStore()
+  const { data: session } = useSession()
+  const fullName = session?.user?.fullName ?? null
   const {
     biometricEnabled, setBiometricEnabled,
     pushEnabled, setPushEnabled,
@@ -34,16 +36,28 @@ export default function SettingsPage() {
   } = useSettingsStore()
 
   const [activeSection, setActiveSection] = useState("notifications")
-  const [syncLoading, setSyncLoading]     = useState(false)
+  const [syncLoading, setSyncLoading] = useState(false)
   const [exportingLogs, setExportingLogs] = useState(false)
-  const [logCategory, setLogCategory]     = useState<string>('ALL')
-  const [cacheSize, setCacheSize]         = useState("0 MB")
-  const [ipAddress]                       = useState("192.168.1.1")
-  const [appVersion, setAppVersion]       = useState("1.0.0")
+  const [logCategory, setLogCategory] = useState<string>('ALL')
+  const [cacheSize, setCacheSize] = useState("0 MB")
+  const [ipAddress] = useState("192.168.1.1")
+  const [appVersion, setAppVersion] = useState("1.0.0")
+  const [wsIp, setWsIp] = useState("")
+  const [wsPort, setWsPort] = useState("")
+  const [wsProtocol, setWsProtocol] = useState<"http" | "https">("http")
+  const [wsSaving, setWsSaving] = useState(false)
 
   useEffect(() => {
     calculateCacheSize()
     fetchVersion()
+
+    const savedIp = localStorage.getItem('settings:wsIp')
+    const savedPort = localStorage.getItem('settings:wsPort')
+    const savedProtocol = localStorage.getItem('settings:wsProtocol') as 'http' | 'https' | null
+
+    if (savedIp) setWsIp(savedIp)
+    if (savedPort) setWsPort(savedPort)
+    if (savedProtocol) setWsProtocol(savedProtocol)
   }, [])
 
   const fetchVersion = async () => {
@@ -73,22 +87,6 @@ export default function SettingsPage() {
       success: () => { setSyncLoading(false); calculateCacheSize(); return 'Datos actualizados correctamente' },
       error: 'Error en la sincronización',
     })
-  }
-
-  const toggleBiometric = async () => {
-    if (!biometricEnabled) {
-      if (window.PublicKeyCredential) {
-        setBiometricEnabled(true)
-        localStorage.setItem('settings:biometricEnabled', 'true')
-        toast.success("Autenticación biométrica activada (Simulación)")
-      } else {
-        toast.error("Tu navegador no soporta autenticación biométrica")
-      }
-    } else {
-      setBiometricEnabled(false)
-      localStorage.setItem('settings:biometricEnabled', 'false')
-      toast("Biometría desactivada")
-    }
   }
 
   const handleClearCache = () => {
@@ -122,9 +120,9 @@ export default function SettingsPage() {
       )
 
       const blob = new Blob([contents.join('\n')], { type: 'text/plain' })
-      const url  = URL.createObjectURL(blob)
-      const a    = document.createElement('a')
-      a.href     = url
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
       a.download = `isync-logs-${logCategory === 'ALL' ? 'all' : logCategory.toLowerCase()}-${new Date().toISOString().slice(0, 10)}.txt`
       a.click()
       URL.revokeObjectURL(url)
@@ -133,6 +131,27 @@ export default function SettingsPage() {
       toast.error('Error al exportar los logs')
     } finally {
       setExportingLogs(false)
+    }
+  }
+
+  const handleSaveWsConfig = async () => {
+    if (!wsIp || !wsPort) {
+      toast.error("Por favor ingresa la IP y el puerto")
+      return
+    }
+
+    setWsSaving(true)
+    try {
+      localStorage.setItem('settings:wsIp', wsIp)
+      localStorage.setItem('settings:wsPort', wsPort)
+      localStorage.setItem('settings:wsProtocol', wsProtocol)
+      const wsUrl = `${wsProtocol}://${wsIp}:${wsPort}`
+      localStorage.setItem('settings:wsUrl', wsUrl)
+      toast.success(`WebSocket guardado: ${wsUrl}`)
+    } catch {
+      toast.error("Error al guardar la configuración")
+    } finally {
+      setWsSaving(false)
     }
   }
 
@@ -237,6 +256,53 @@ export default function SettingsPage() {
               </Button>
             </div>
           </div>
+
+          <div className="pt-2">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Configuración WebSocket</p>
+            <div className="flex gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs text-gray-600">Protocolo</Label>
+                <Select value={wsProtocol} onValueChange={(val) => setWsProtocol(val as "http" | "https")}>
+                  <SelectTrigger className="h-9 text-sm border-gray-200 rounded-xl">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="http">HTTP</SelectItem>
+                    <SelectItem value="https">HTTPS</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs text-gray-600">IP del Servidor</Label>
+                <Input
+                  placeholder="000.000.000.00"
+                  value={wsIp}
+                  onChange={(e) => setWsIp(e.target.value)}
+                  className="h-9 text-sm border-gray-200 rounded-xl"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs text-gray-600">Puerto</Label>
+                <Input
+                  placeholder="5050"
+                  value={wsPort}
+                  onChange={(e) => setWsPort(e.target.value)}
+                  className="h-9 text-sm border-gray-200 rounded-xl"
+                />
+              </div>
+            </div>
+            <div className="mt-3 flex gap-2">
+              <Button
+                onClick={handleSaveWsConfig}
+                disabled={wsSaving}
+                size="sm"
+                className="bg-brand-primary hover:bg-brand-primary/90 rounded-full"
+              >
+                <Wifi size={14} className="mr-1.5" />
+                {wsSaving ? 'Guardando...' : 'Guardar WebSocket'}
+              </Button>
+            </div>
+          </div>
         </Section>
       )
 
@@ -279,7 +345,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 p-4 sm:p-6 bg-gray-50/50 min-h-screen">
+    <div className="flex flex-col gap-6 p-4 sm:p-6 bg-gray-50/50 dark:bg-[#141414] min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

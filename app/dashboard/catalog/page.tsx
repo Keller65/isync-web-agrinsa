@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useRef } from "react"
 import dynamic from "next/dynamic"
 import { File, Image, Rows, Grid3X3 } from "lucide-react"
 import { MagnifyingGlass } from "@phosphor-icons/react"
@@ -8,9 +8,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import axios, { isAxiosError } from "axios"
-import { useAuthStore } from '@/lib/store'
 import { usePathname } from "next/navigation"
 import CatalogPdf from "@/components/CatalogPdf"
+import { useSession } from "next-auth/react"
 
 const PDFDownloadLink = dynamic(
   () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
@@ -37,7 +37,8 @@ export default function CatalogPage() {
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [hasMore, setHasMore] = useState(true)
 
-  const { token } = useAuthStore()
+  const { data: session } = useSession();
+  const token = session?.user.token
   const pathname = usePathname()
   const prevTokenRef = useRef<string | null>(null)
 
