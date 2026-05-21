@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch"
 import { Input } from "@/components/ui/input"
 import { useSession } from "next-auth/react"
 import { AdminUser, MenuItemResponse } from "@/types/api-types"
-import { toast, Toaster } from "sonner"
+import { toast } from "sonner"
 import { ShieldIcon } from "lucide-react"
 
 export default function EditUserPage() {
@@ -365,9 +365,9 @@ export default function EditUserPage() {
 
             <div className="grid grid-cols-2 gap-4">
               {[
-                { icon: UserIcon, label: "Permitir login web", key: "canLoginWeb" },
-                { icon: UserIcon, label: "Permitir login app", key: "canLoginApp" },
-                { icon: ShieldIcon, label: "Es administrador maestro", key: "isMasterAdmin" },
+                { icon: GlobeIcon, label: "Acceso a la web", key: "canLoginWeb" },
+                { icon: AndroidLogoIcon, label: "Acceso a la app", key: "canLoginApp" },
+                { icon: ShieldIcon, label: "Administrador maestro", key: "isMasterAdmin" },
                 { icon: UserIcon, label: "Usuario activo", key: "isActive" },
               ].map(({ icon: Icon, label, key }) => (
                 <div
