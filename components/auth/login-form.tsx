@@ -135,8 +135,8 @@ export default function LoginForm() {
 
         <button
           type="submit"
-          className="w-full bg-brand-primary cursor-pointer text-white font-semibold py-3 px-4 rounded-full h-12.5 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
-          disabled={isPending}
+          className="w-full  bg-brand-primary  text-white font-semibold py-3 px-4 rounded-full h-12.5 cursor-pointeractive:scale-[0.98]  disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-alloweddisabled:opacity-100 transition-colors"
+          disabled={isPending || password.length === 0 || username.length === 0}
         >
           {isPending ? "Iniciando Sesión..." : "Iniciar Sesión"}
         </button>
