@@ -437,7 +437,7 @@ export default function OrderDetailPage() {
             {/* Totals Card */}
             <div className="bg-gray-900 dark:bg-dark-card rounded-2xl p-5 text-white dark:border dark:border-white/[0.07]">
               <h3 className="text-[10px] font-semibold text-gray-500 mb-4 uppercase tracking-widest flex items-center gap-2">
-                <Coins size={14} /> Resumen del Pedido
+                <Coins size={14} /> Resumen de la Cotizacion
               </h3>
 
               <div className="space-y-3">

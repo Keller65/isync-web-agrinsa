@@ -295,7 +295,7 @@ function CartISync() {
                   variant="destructive"
                   className="rounded-full cursor-pointer min-h-10 text-xs"
                 >
-                  Cancelar Pedido
+                  Cancelar Cotizacion
                 </Button>
               )}
             </div>
@@ -409,7 +409,7 @@ function CartISync() {
                   className="w-full font-normal bg-brand-primary text-white hover:bg-brand-primary h-12 md:h-13 text-sm md:text-md tracking-[0.3px] rounded-full cursor-pointer disabled:bg-gray-300 dark:disabled:bg-dark-raised disabled:text-gray-600 dark:disabled:text-dark-text-disabled"
                   disabled={productsInCart.length === 0 || isLoading}
                 >
-                  {isLoading ? "Procesando..." : editMode ? "Actualizar" : "Realizar Pedido"}
+                  {isLoading ? "Procesando..." : editMode ? "Actualizar" : "Realizar Cotizacion"}
                 </Button>
 
                 <div className="flex gap-2 md:gap-3">
@@ -498,8 +498,8 @@ function CartISync() {
             <AlertDialogTitle className="dark:text-dark-text-primary">¿Estás seguro?</AlertDialogTitle>
             <AlertDialogDescription className="dark:text-dark-text-muted">
               {editMode
-                ? "¿Deseas actualizar este pedido con los cambios actuales?"
-                : "¿Seguro que quieres enviar este pedido?"}
+                ? "¿Deseas actualizar esta cotizacion con los cambios actuales?"
+                : "¿Seguro que quieres enviar esta cotizacion?"}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -539,13 +539,13 @@ function CartISync() {
         <AlertDialogContent className="bg-green-300 dark:bg-green-400/10 border-green-300 dark:border-green-400/20">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-green-600 dark:text-green-400">
-              {editMode ? "¡Pedido Actualizado!" : "¡Pedido Creado!"}
+              {editMode ? "¡Cotizacion Actualizada!" : "¡Cotizacion Creada!"}
             </AlertDialogTitle>
             <AlertDialogDescription className="text-green-600 dark:text-green-400">
-              El pedido ha sido{" "}
+              La cotizacion ha sido{" "}
               {editMode
-                ? "actualizado correctamente"
-                : <>creado correctamente con el número <strong>#{orderInfo.docEntry}</strong></>}
+                ? "actualizada correctamente"
+                : <>creada correctamente con el número <strong>#{orderInfo.docEntry}</strong></>}
               .
             </AlertDialogDescription>
           </AlertDialogHeader>
