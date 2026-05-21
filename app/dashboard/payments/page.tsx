@@ -6,14 +6,7 @@ import axios from "axios"
 import { useInvoiceStore } from '@/lib/store/store.invoice'
 import { Payment } from '@/types/payments'
 import { CustomerType } from '@/types/customers'
-import {
-  FileText,
-  CalendarDots,
-  CreditCard,
-  Coins,
-  ArrowClockwise,
-  Plus,
-} from "@phosphor-icons/react"
+import { FileText, CalendarDots, CreditCard, Coins, ArrowClockwise, Plus, } from "@phosphor-icons/react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import Avvvatars from "avvvatars-react"
@@ -199,7 +192,7 @@ export default function PaymentsPage() {
       </div>
 
       {!isLoading && payments.length === 0 && (
-        <div className="py-12 text-center text-gray-500">
+        <div className="py-12 text-center h-[76vh] text-gray-500 flex flex-col items-center justify-center">
           <p className="text-sm">No hay pagos registrados</p>
           <p className="text-xs">
             Los pagos aparecerán aquí automáticamente

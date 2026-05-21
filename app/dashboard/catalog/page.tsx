@@ -51,9 +51,9 @@ export default function CatalogPage() {
 
   const filteredProducts = debouncedSearch
     ? allProducts.filter(p =>
-        p.itemName.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        p.itemCode.toLowerCase().includes(debouncedSearch.toLowerCase())
-      )
+      p.itemName.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+      p.itemCode.toLowerCase().includes(debouncedSearch.toLowerCase())
+    )
     : allProducts
 
   const toggleProduct = (code: string) => {
@@ -141,17 +141,17 @@ export default function CatalogPage() {
   }
 
   return (
-    <div className="p-8 max-w-full mx-auto">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-semibold">Generar Catálogo PDF</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Crea catálogos personalizados de productos
-          </p>
-        </div>
+    <div className="p-6 max-w-full mx-auto">
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
+          Catalogo de Productos
+        </h2>
+        <p className="text-sm text-gray-500">
+          Exportar como PDF tus productos
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
 
         {/* PRODUCTOS */}
         <div className="lg:col-span-2 space-y-4">

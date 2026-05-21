@@ -163,8 +163,8 @@ export default function OrderDetailPage() {
           <div className="size-16 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
             <FileText size={28} className="text-red-400" />
           </div>
-          <h2 className="text-lg font-bold text-gray-900 mb-1">No se pudo cargar la Oferta</h2>
-          <p className="text-sm text-gray-500 mb-6">{error || 'Oferta no encontrada.'}</p>
+          <h2 className="text-lg font-bold text-gray-900 mb-1">No se pudo cargar la Cotizacion</h2>
+          <p className="text-sm text-gray-500 mb-6">{error || 'Cotizacion no encontrada.'}</p>
           <button
             onClick={() => router.back()}
             className="inline-flex items-center gap-2 bg-brand-primary text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity"
@@ -217,7 +217,7 @@ export default function OrderDetailPage() {
       level: 'INFO',
       category: 'PEDIDO',
       endpoint: `${FETCH_URL}/${orderDetail.docEntry}`,
-      message: `Edición iniciada — Oferta #${orderDetail.docNum} (${orderDetail.cardName})`,
+      message: `Edición iniciada — Cotizacion #${orderDetail.docNum} (${orderDetail.cardName})`,
       payload: { docEntry: orderDetail.docEntry, docNum: orderDetail.docNum, cardCode: orderDetail.cardCode, lines: orderDetail.lines.length },
       pageUrl: `/dashboard/orders/${orderDetail.docEntry}`,
       userId: sellerName ?? undefined,
@@ -234,7 +234,7 @@ export default function OrderDetailPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
           {/* Breadcrumb */}
           <nav className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500 mb-2">
-            <button onClick={() => router.back()} className="hover:text-gray-600 dark:hover:text-gray-300 transition-colors">Oferta</button>
+            <button onClick={() => router.back()} className="hover:text-gray-600 dark:hover:text-gray-300 transition-colors">Cotizacion</button>
             <ChevronRight size={12} />
             <span className="text-gray-700 dark:text-gray-200 font-medium">#{orderDetail.docNum}</span>
           </nav>
@@ -246,7 +246,7 @@ export default function OrderDetailPage() {
               </button>
               <div>
                 <div className="flex items-center gap-2.5">
-                  <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">Oferta #{orderDetail.docNum}</h1>
+                  <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">Cotizacion #{orderDetail.docNum}</h1>
                   <span className="bg-amber-50 text-amber-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-amber-200 dark:bg-amber-400/10 dark:text-amber-400 dark:border-amber-400/20">
                     En Proceso
                   </span>
@@ -260,7 +260,7 @@ export default function OrderDetailPage() {
                 <>
                   <PDFDownloadLink
                     document={<OrderPDF order={orderDetail} sellerName={sellerName ?? ''} />}
-                    fileName={`Oferta-${orderDetail.docNum}.pdf`}
+                    fileName={`Cotizacion-${orderDetail.docNum}.pdf`}
                   >
                     {({ loading }: { loading: boolean }) => (
                       <button

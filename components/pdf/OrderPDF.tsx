@@ -10,7 +10,7 @@ import {
   Image
 } from '@react-pdf/renderer';
 import { OrderDetailType } from '@/types/orders';
-import LogoImage from "@/public/assets/iSync.png";
+import LogoImage from "@/public/assets/Agrinsa.png";
 
 const formatMoney = (amount: number) => {
   return amount.toLocaleString('es-HN', {
@@ -101,14 +101,15 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: 'bold',
   },
-  thCode: { width: '10%' },
-  thDesc: { width: '25%' },
-  thCant: { width: '8%', textAlign: 'center' },
-  thPU: { width: '12%', textAlign: 'right' },
-  thImporte: { width: '12%', textAlign: 'right' },
-  thISV: { width: '10%', textAlign: 'right' },
-  thTaxCode: { width: '8%', textAlign: 'center' },
-  thTotal: { width: '15%', textAlign: 'right' },
+  thCode: { width: '9%' },
+  thSKU: { width: '9%' },
+  thDesc: { width: '27%' },
+  thCant: { width: '7%', textAlign: 'center' },
+  thPU: { width: '11%', textAlign: 'right' },
+  thImporte: { width: '11%', textAlign: 'right' },
+  thISV: { width: '8%', textAlign: 'right' },
+  thTaxCode: { width: '5%', textAlign: 'center' },
+  thTotal: { width: '17%', textAlign: 'right' },
 
   tableRow: {
     flexDirection: 'row',
@@ -117,23 +118,24 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 4,
   },
+
+  tdCode: { width: '9%', fontSize: 8 },
+  tdSKU: { width: '9%', fontSize: 8 },
+  tdDesc: { width: '27%', fontSize: 8 },
+  tdCant: { width: '7%', fontSize: 8, textAlign: 'center' },
+  tdPU: { width: '11%', fontSize: 8, textAlign: 'right' },
+  tdImporte: { width: '11%', fontSize: 8, textAlign: 'right' },
+  tdISV: { width: '8%', fontSize: 8, textAlign: 'right' },
+  tdTaxCode: { width: '5%', fontSize: 8, textAlign: 'center' },
+  tdTotal: { width: '17%', fontSize: 8, textAlign: 'right' },
+
   emptyRow: {
     flexDirection: 'row',
     borderBottomWidth: 0.5,
     borderColor: '#eee',
     paddingVertical: 6,
     paddingHorizontal: 4,
-    height: 24,
   },
-
-  tdCode: { width: '10%', fontSize: 9 },
-  tdDesc: { width: '25%', fontSize: 9 },
-  tdCant: { width: '8%', fontSize: 9, textAlign: 'center' },
-  tdPU: { width: '12%', fontSize: 9, textAlign: 'right' },
-  tdImporte: { width: '12%', fontSize: 9, textAlign: 'right' },
-  tdISV: { width: '10%', fontSize: 9, textAlign: 'right' },
-  tdTaxCode: { width: '8%', fontSize: 9, textAlign: 'center' },
-  tdTotal: { width: '15%', fontSize: 9, textAlign: 'right' },
 
   footerSection: {
     flexDirection: 'row',
@@ -225,43 +227,25 @@ const OrderPDF: React.FC<OrderPDFProps> = ({ order, sellerName = '' }) => {
 
   lines.forEach((item, index) => {
     const itemTaxCode = (item as any).taxCode ?? "";
-    const priceAfterVAT = item.priceAfterVAT ?? 0;
+    const unitPriceNoVAT = item.unitPriceNoVAT ?? 0;
     const quantity = item.quantity ?? 0;
 
-    const isISV = itemTaxCode === "ISV15";
-    const isEXE = itemTaxCode === "EXE";
-
-    let lineNetTotal = 0;
-    let lineISVTotal = 0;
-    let lineTotalWithISV = 0;
-
-    if (isISV) {
-      // Producto con ISV: calcular impuesto
-      const isvPerUnit = priceAfterVAT - (priceAfterVAT / 1.15);
-      lineISVTotal = quantity * isvPerUnit;
-      lineNetTotal = (quantity * priceAfterVAT) / 1.15;
-      lineTotalWithISV = lineNetTotal + lineISVTotal;
-    } else if (isEXE) {
-      // Producto exento: NO calcular ISV
-      lineNetTotal = quantity * priceAfterVAT;
-      lineISVTotal = 0;
-      lineTotalWithISV = lineNetTotal;
-    } else {
-      // Otros casos (por defecto, sin ISV)
-      lineNetTotal = quantity * priceAfterVAT;
-      lineISVTotal = 0;
-      lineTotalWithISV = lineNetTotal;
-    }
+    const isISV = itemTaxCode === "ISV";
+    const isvPerUnit = isISV ? unitPriceNoVAT * 0.15 : 0;
+    const lineISVTotal = quantity * isvPerUnit;
+    const lineTotalWithISV = quantity * (unitPriceNoVAT + isvPerUnit);
+    const lineNetTotal = quantity * unitPriceNoVAT;
 
     subtotalCalculated += lineNetTotal;
-    totalISVCalculated += isISV ? lineISVTotal : 0;
+    totalISVCalculated += lineISVTotal;
 
     productsViews.push(
       <View key={item.itemCode || index} style={styles.tableRow}>
         <Text style={styles.tdCode}>{item.itemCode ?? ""}</Text>
-        <Text style={styles.tdDesc}>{item.itemDescription ?? ""}</Text>
+        <Text style={styles.tdSKU}>{item.suppCatNum ?? ""}</Text>
+        <Text style={styles.tdDesc}>{item.itemName ?? ""}</Text>
         <Text style={styles.tdCant}>{quantity.toFixed(2)}</Text>
-        <Text style={styles.tdPU}>L{formatMoney(priceAfterVAT)}</Text>
+        <Text style={styles.tdPU}>L{formatMoney(unitPriceNoVAT)}</Text>
         <Text style={styles.tdImporte}>L{formatMoney(lineNetTotal)}</Text>
         <Text style={styles.tdISV}>L{formatMoney(lineISVTotal)}</Text>
         <Text style={styles.tdTaxCode}>{itemTaxCode}</Text>
@@ -296,25 +280,31 @@ const OrderPDF: React.FC<OrderPDFProps> = ({ order, sellerName = '' }) => {
         {/* HEADER */}
         <View style={styles.headerContainer}>
           <View style={styles.companyInfo}>
-            <Text style={styles.companyName}>iSync SAP Business One</Text>
+            <Text style={styles.companyName}>AGRINSA</Text>
             <Text style={styles.companySubtitle}>
-              iSync Web Demo
+              MOTORES AGRO INDUSTRIALES SA DE CV
             </Text>
             <Text style={styles.companyDetail}>
-              Barrio Suyapa 15 avenida 9 Calle S, 21104 San Pedro Sula, Cortés, Honduras
+              Principal: Bo. La Guardia, San Pedro Sula, Cortes, 23 Calle, 1 Ave.
             </Text>
             <Text style={styles.companyDetail}>
-              E-mail: desarrollo@solteci.com
+              Bloque #1 De Los Juzgados De Avenida New Orleans
+            </Text>
+            <Text style={styles.companyDetail}>
+              2 Cuadras Hacia Abajo Izquierda. Honduras, C.A. Tel: (504) 2544-2476
+            </Text>
+            <Text style={styles.companyDetail}>
+              E-mail: contabilidad@agrinsahn.com
             </Text>
             <Text style={styles.companyDetail}>
               <Text style={{ fontWeight: 'bold' }}>
-                RTN: 0501-0000-000000
+                RTN: 05019995093760
               </Text>
             </Text>
           </View>
         </View>
 
-        <Text style={styles.docTitle}>Oferta - {docNum || 'SN'}</Text>
+        <Text style={styles.docTitle}>Cotización - {docNum || 'SN'}</Text>
 
         {/* INFO */}
         <View style={styles.infoTable}>
@@ -347,6 +337,7 @@ const OrderPDF: React.FC<OrderPDFProps> = ({ order, sellerName = '' }) => {
         <View style={styles.tableArticles}>
           <View style={styles.tableHeader}>
             <Text style={[styles.tableHeaderCell, styles.thCode]}>Código</Text>
+            <Text style={[styles.tableHeaderCell, styles.thSKU]}>SKU</Text>
             <Text style={[styles.tableHeaderCell, styles.thDesc]}>Descripción</Text>
             <Text style={[styles.tableHeaderCell, styles.thCant]}>Cant</Text>
             <Text style={[styles.tableHeaderCell, styles.thPU]}>P/U</Text>
@@ -364,7 +355,7 @@ const OrderPDF: React.FC<OrderPDFProps> = ({ order, sellerName = '' }) => {
           <View style={styles.notesSection}>
             <Text>
               <Text style={{ fontWeight: 'bold' }}>
-                Nota: La Oferta tiene vigencia por 15 días
+                Nota: La cotización tiene vigencia por 15 días
               </Text>
             </Text>
 

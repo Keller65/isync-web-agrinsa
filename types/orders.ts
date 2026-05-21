@@ -7,6 +7,7 @@ export interface OrderLineType {
   priceAfterVAT?: number;
   priceList?: number;
   price?: number;
+  suppCatNum?: string;
   unitPriceNoVAT?: number;
   basePriceNoVAT?: number;
   taxCode: string;

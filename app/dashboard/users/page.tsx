@@ -137,12 +137,17 @@ export default function Page() {
   }
 
   return (
-    <div className="p-4 max-w-full mx-auto dark:bg-dark-page">
-      <div className="flex justify-between items-center mb-8">
+    <div className="p-6 max-w-full mx-auto dark:bg-dark-page">
+      <div className="flex justify-between items-center mb-4">
         <div>
-          <h1 className="text-2xl font-semibold">Usuarios</h1>
-          <p className="text-sm text-muted-foreground mt-1">Gestiona el acceso y permisos de tu equipo</p>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
+            Administracion de Usuarios
+          </h2>
+          <p className="text-sm text-gray-500">
+            Administra accesos a tus usurios
+          </p>
         </div>
+
         <Button variant="outline" className="gap-2" onClick={() => setIsCreateModalOpen(true)}>
           <Plus size={18} />
           Nuevo usuario

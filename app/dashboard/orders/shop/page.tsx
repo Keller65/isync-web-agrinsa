@@ -593,7 +593,7 @@ function ProductCard({ product }: { product: Product }) {
                   }`}>
                   <div className="flex items-center gap-1">
                     <SealPercent weight="fill" size={14} />
-                    <span>OFERTA</span>
+                    <span>Cotizacion</span>
                   </div>
                 </div>
               </div>
@@ -1080,7 +1080,7 @@ export default function Page() {
                 }`}
             >
               <Tag size={16} weight="fill" />
-              <span className="font-medium text-sm">Ofertas</span>
+              <span className="font-medium text-sm">Cotizaciones</span>
             </button>
 
             <div className="px-4 py-2 border-t">
@@ -1123,7 +1123,7 @@ export default function Page() {
                 }`}
             >
               <Tag size={14} weight="fill" />
-              Ofertas
+              Cotizaciones
             </button>
             {categories.map(cat => (
               <button
