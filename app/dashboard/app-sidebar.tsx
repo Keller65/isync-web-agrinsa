@@ -197,8 +197,8 @@ export function AppSidebar() {
                       {session?.user?.isMasterAdmin == null
                         ? "Cargando..."
                         : session.user.isMasterAdmin
-                          ? "Usuario Administrador"
-                          : "Vendedor iSync"}
+                          ? "Administrador Agrinsa"
+                          : "Vendedor Agrinsa"}
                     </span>
                   </div>
 
