@@ -137,7 +137,7 @@ export function AppSidebar() {
                   iSync Web
                 </span>
                 <span className="truncate text-xs text-muted-foreground">
-                  iSync
+                  Agrinsa
                 </span>
               </div>
             </SidebarMenuButton>
