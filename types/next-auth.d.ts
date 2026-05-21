@@ -18,8 +18,8 @@ declare module "next-auth" {
       u_WhsCode: string
       u_SerieCot: string
       requiresTwoFactorSetup: boolean
-      qrCodeBase64: string | null
-      manualKey: string | null
+      qrCodeBase64?: string | null
+      manualKey?: string | null
       expiresAt?: number
       isMasterAdmin: boolean
       menus?: MenuItem[]
@@ -34,8 +34,8 @@ declare module "next-auth" {
     u_WhsCode: string
     u_SerieCot: string
     requiresTwoFactorSetup: boolean
-    qrCodeBase64: string | null
-    manualKey: string | null
+    qrCodeBase64?: string | null
+    manualKey?: string | null
     isMasterAdmin: boolean
     menus?: MenuItem[]
   }
@@ -50,8 +50,8 @@ declare module "next-auth/jwt" {
     u_WhsCode: string
     u_SerieCot: string
     requiresTwoFactorSetup: boolean
-    qrCodeBase64: string | null
-    manualKey: string | null
+    qrCodeBase64?: string | null
+    manualKey?: string | null
     expiresAt?: number
     isMasterAdmin: boolean
     menus?: MenuItem[]

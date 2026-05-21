@@ -52,8 +52,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               fullName: apiData.fullName,
               u_WhsCode: apiData.u_WhsCode,
               u_SerieCot: apiData.u_SerieCot,
-              qrCodeBase64: apiData.qrCodeBase64 ?? null,
-              manualKey: apiData.manualKey ?? null,
               email: `${apiData.salesPersonCode}@isync.local`,
               isMasterAdmin: apiData.isMasterAdmin ?? false,
               menus: apiData.menus ?? [],
