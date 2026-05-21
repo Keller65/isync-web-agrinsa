@@ -56,7 +56,6 @@ const PriceDisplay = ({ price, decimalNum }: { price: number; decimalNum: number
   );
 }
 
-
 function CartISync() {
   const router = useRouter()
   const { selectedCustomer, selectedAddress, clearSelectedCustomer, setSelectedAddress, sellerDifferent, selectedSlpCode } = useCustomerStore()
@@ -263,7 +262,7 @@ function CartISync() {
           </span>
         </DrawerTrigger>
 
-        <DrawerContent className="h-screen min-w-[90vw] md:min-w-[60vw] max-w-150 right-0 left-auto rounded-none border-l dark:border-white/[0.07]">
+        <DrawerContent className="h-screen min-w-screen md:min-w-[60vw] max-w-150 right-0 left-auto rounded-none border-l dark:border-white/[0.07]">
           <div className="flex flex-col h-full bg-white dark:bg-dark-card justify-between">
             <DrawerHeader className="flex flex-row justify-between px-4 md:px-8 py-4 md:py-6">
               <DrawerTitle className="text-lg md:text-2xl font-semibold uppercase tracking-tight flex items-center gap-2 md:gap-3 text-gray-900 dark:text-dark-text-primary">
