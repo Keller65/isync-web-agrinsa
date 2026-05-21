@@ -5,10 +5,9 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
 import Avvvatars from "avvvatars-react"
-import { Cardholder, ChartLineUp, ShoppingCart, CaretUpDown, SignOut, Path, Books, FileCsvIcon, GpsFixIcon, ClockCounterClockwiseIcon, UsersIcon, GearSixIcon, CaretUpDownIcon } from "@phosphor-icons/react"
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarGroup, SidebarGroupLabel, useSidebar } from "@/components/ui/sidebar"
+import { Cardholder, ChartLineUp, ShoppingCart, SignOut, Books, UsersIcon, GearSixIcon, CaretUpDownIcon, } from "@phosphor-icons/react"
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarGroup, SidebarGroupLabel, useSidebar, } from "@/components/ui/sidebar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger, } from "@/components/ui/collapsible"
 import type { MenuItem } from "@/types/next-auth"
 
 const MENU_CODE_MAP: Record<string, string> = {
@@ -27,7 +26,7 @@ const items = [
     title: "Principal",
     items: [
       {
-        title: "Analiticas",
+        title: "Analíticas",
         url: "/dashboard",
         icon: ChartLineUp,
       },
@@ -41,21 +40,18 @@ const items = [
         url: "/dashboard/catalog",
         icon: Books,
       },
-    ]
+    ],
   },
   {
     title: "Cotizaciones",
     items: [
-      { title: "Cotizaciones", url: "/dashboard/orders", icon: ShoppingCart },
-    ]
+      {
+        title: "Cotizaciones",
+        url: "/dashboard/orders",
+        icon: ShoppingCart,
+      },
+    ],
   },
-  // {
-  //   title: "Ubicaciones",
-  //   items: [
-  //     { title: "Historial GPS", url: "/dashboard/maps/history", icon: ClockCounterClockwiseIcon },
-  //     { title: "GPS en Tiempo Real", url: "/dashboard/maps/real-time", icon: GpsFixIcon },
-  //   ]
-  // },
   {
     title: "Utilidades",
     items: [
@@ -64,7 +60,7 @@ const items = [
         url: "/dashboard/users",
         icon: UsersIcon,
       },
-    ]
+    ],
   },
   {
     title: "Cuenta",
@@ -74,33 +70,46 @@ const items = [
         url: "/dashboard/settings",
         icon: GearSixIcon,
       },
-    ]
-  }
+    ],
+  },
 ]
 
 function canViewMenu(url: string, menus: MenuItem[] | undefined, isMasterAdmin: boolean): boolean {
+  // Master admin ve todo
   if (isMasterAdmin) return true
-  if (!menus || menus.length === 0) return true
 
+  if (!menus || menus.length === 0) return false
   const menuCode = MENU_CODE_MAP[url]
-  if (!menuCode) return true
 
-  const menu = menus.find(m => m.menuCode === menuCode)
-  return menu?.canView ?? true
+  // Si la ruta no existe en el mapa de permisos, ocultar
+  if (!menuCode) return false
+
+  const menu = menus.find((m) => m.menuCode === menuCode)
+
+  return menu?.canView === true
 }
 
 export function AppSidebar() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const router = useRouter()
   const { setOpenMobile, isMobile } = useSidebar()
 
   const menus = session?.user?.menus
   const isMasterAdmin = session?.user?.isMasterAdmin ?? false
 
-  const filteredItems = items.map(group => ({
-    ...group,
-    items: group.items?.filter(item => canViewMenu(item.url, menus, isMasterAdmin)) ?? []
-  })).filter(group => group.items.length > 0)
+  // Mientras carga sesión, evitar renderizar items incorrectos
+  const filteredItems =
+    status === "loading"
+      ? []
+      : items
+        .map((group) => ({
+          ...group,
+          items:
+            group.items?.filter((item) =>
+              canViewMenu(item.url, menus, isMasterAdmin)
+            ) ?? [],
+        }))
+        .filter((group) => group.items.length > 0)
 
   const handleSignOut = async () => {
     await signOut({ redirect: false })
@@ -122,9 +131,14 @@ export function AppSidebar() {
                   priority
                 />
               </div>
+
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">iSync Web</span>
-                <span className="truncate text-xs text-muted-foreground">iSync</span>
+                <span className="truncate font-semibold">
+                  iSync Web
+                </span>
+                <span className="truncate text-xs text-muted-foreground">
+                  iSync
+                </span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -134,34 +148,29 @@ export function AppSidebar() {
       <SidebarContent>
         {filteredItems.map((group) => (
           <SidebarGroup key={group.title}>
-            <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
+            <SidebarGroupLabel>
+              {group.title}
+            </SidebarGroupLabel>
+
             <SidebarMenu>
-              {'subItems' in group && group.subItems ? (
-                <Collapsible key={group.title} asChild className="group/collapsible">
-                  <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton tooltip={group.title}>
-                        {/* <group.icon size={20} /> */}
-                        <span>{group.title}</span>
-                        <Path className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" size={14} />
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                    </CollapsibleContent>
-                  </SidebarMenuItem>
-                </Collapsible>
-              ) : (
-                'items' in group && group.items?.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild tooltip={item.title}>
-                      <Link href={item.url} onClick={() => isMobile && setOpenMobile(false)}>
-                        <item.icon size={20} />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))
-              )}
+              {group.items.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    tooltip={item.title}
+                  >
+                    <Link
+                      href={item.url}
+                      onClick={() =>
+                        isMobile && setOpenMobile(false)
+                      }
+                    >
+                      <item.icon size={20} />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
             </SidebarMenu>
           </SidebarGroup>
         ))}
@@ -173,18 +182,42 @@ export function AppSidebar() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton size="lg">
-                  <Avvvatars value={session?.user?.email ?? ''} style="shape" size={32} />
+                  <Avvvatars
+                    value={session?.user?.email ?? ""}
+                    style="shape"
+                    size={32}
+                  />
+
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">{session?.user?.fullName}</span>
+                    <span className="truncate font-semibold">
+                      {session?.user?.fullName}
+                    </span>
+
                     <span className="truncate text-xs text-muted-foreground">
-                      {session?.user?.isMasterAdmin == null ? "Cargando..." : session.user.isMasterAdmin ? "Usuario Administrador" : "Vendedor iSync"}
+                      {session?.user?.isMasterAdmin == null
+                        ? "Cargando..."
+                        : session.user.isMasterAdmin
+                          ? "Usuario Administrador"
+                          : "Vendedor iSync"}
                     </span>
                   </div>
-                  <CaretUpDownIcon size={16} className="ml-auto" />
+
+                  <CaretUpDownIcon
+                    size={16}
+                    className="ml-auto"
+                  />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg" side="top" align="end">
-                <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
+
+              <DropdownMenuContent
+                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                side="top"
+                align="end"
+              >
+                <DropdownMenuItem
+                  onClick={handleSignOut}
+                  className="text-destructive"
+                >
                   <SignOut size={16} className="mr-2" />
                   Cerrar Sesión
                 </DropdownMenuItem>
