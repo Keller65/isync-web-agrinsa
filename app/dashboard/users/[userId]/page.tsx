@@ -45,6 +45,7 @@ export default function EditUserPage() {
 
   const [menuSearch, setMenuSearch] = useState("")
   const [menuFilter, setMenuFilter] = useState<"all" | "active" | "inactive">("all")
+  const [savingPermissionKey, setSavingPermissionKey] = useState<string | null>(null)
 
   useEffect(() => {
     if (!token || !userId) return
@@ -187,11 +188,6 @@ export default function EditUserPage() {
     }
   }
 
-  const handleActiveUser = async () => {
-    // legacy placeholder - not used
-    return
-  }
-
   const handleToggleActive = async (checked: boolean) => {
     if (!token || !userId) return
 
@@ -216,11 +212,52 @@ export default function EditUserPage() {
     }
   }
 
+  const handleTogglePermission = async (key: string, checked: boolean) => {
+    if (!token || !userId) return
+
+    const prev = { ...formData }
+    // optimistic update
+    setFormData((p) => ({ ...p, [key]: checked }))
+    setSavingPermissionKey(key)
+
+    try {
+      const payload = {
+        email: prev.email ?? "",
+        employeeId: prev.employeeId ? Number(prev.employeeId) : 0,
+        salesPersonCode: prev.salesPersonCode ? Number(prev.salesPersonCode) : 0,
+        canLoginWeb: key === "canLoginWeb" ? checked : prev.canLoginWeb,
+        canLoginApp: prev.canLoginApp,
+        isMasterAdmin: key === "isMasterAdmin" ? checked : prev.isMasterAdmin,
+      }
+
+      await axios.put(
+        `/api-proxy/api/isync/auth/admin/users/${userId}`,
+        payload,
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+
+      toast.success("Configuración actualizada")
+    } catch (err) {
+      console.error("Error updating permission:", err)
+      // revert
+      setFormData(prev)
+      toast.error("Error al actualizar configuración")
+    } finally {
+      setSavingPermissionKey(null)
+    }
+  }
+
   const handleToggle = (key: string, checked: boolean) => {
     if (key === "isActive") {
       void handleToggleActive(checked)
       return
     }
+
+    if (key === "canLoginWeb" || key === "isMasterAdmin") {
+      void handleTogglePermission(key, Boolean(checked))
+      return
+    }
+
     setFormData((p) => ({ ...p, [key]: checked }))
   }
 
@@ -346,7 +383,13 @@ export default function EditUserPage() {
                   <Switch
                     className="cursor-pointer"
                     checked={formData[key as keyof typeof formData] as boolean}
-                    disabled={key === "isActive" ? savingUser : false}
+                    disabled={
+                      key === "isActive"
+                        ? savingUser
+                        : key === "canLoginWeb" || key === "isMasterAdmin"
+                          ? savingPermissionKey === key
+                          : false
+                    }
                     onCheckedChange={(checked) => handleToggle(key, Boolean(checked))}
                   />
                 </div>
