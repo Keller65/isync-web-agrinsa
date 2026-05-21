@@ -7,7 +7,7 @@ import SessionGate from "@/components/auth/SessionGate";
 
 export const metadata: Metadata = {
   title: "iSync Web - Todo Sincronizado",
-  description: "iSync Web es una aplicacin de tareas que se sincroniza con iSync, permitiendo gestionar tus Cotizacion de manera eficiente y sin complicaciones.",
+  description: "iSync Web es una aplicacin de tareas que se sincroniza con iSync, permitiendo gestionar tus Cotizaciones de manera eficiente y sin complicaciones.",
 };
 
 export default function RootLayout({
