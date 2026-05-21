@@ -395,7 +395,7 @@ function CartISync() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2 md:gap-3">
+              <div className="flex flex-row gap-2 md:gap-3">
                 <Button
                   onClick={() => {
                     if (selectedCustomer?.editRTN) {
@@ -406,7 +406,7 @@ function CartISync() {
                       setShowConfirmAlert(true)
                     }
                   }}
-                  className="w-full font-normal bg-brand-primary text-white hover:bg-brand-primary h-12 md:h-13 text-sm md:text-md tracking-[0.3px] rounded-full cursor-pointer disabled:bg-gray-300 dark:disabled:bg-dark-raised disabled:text-gray-600 dark:disabled:text-dark-text-disabled"
+                  className="flex-1 font-normal bg-brand-primary text-white hover:bg-brand-primary h-12 text-sm md:text-md tracking-[0.3px] rounded-full cursor-pointer disabled:bg-gray-300 dark:disabled:bg-dark-raised disabled:text-gray-600 dark:disabled:text-dark-text-disabled"
                   disabled={productsInCart.length === 0 || isLoading}
                 >
                   {isLoading ? "Procesando..." : editMode ? "Actualizar" : "Realizar Cotizacion"}
@@ -428,7 +428,7 @@ function CartISync() {
                     }}
                     className="size-12 md:size-13 rounded-full bg-brand-primary hover:bg-brand-primary p-0 grid place-content-center cursor-pointer disabled:bg-gray-300 dark:disabled:bg-dark-raised"
                   >
-                    <MapPinLine size={68} />
+                    <MapPinLine color="white" size={68} />
                   </Button>
                 </div>
               </div>
