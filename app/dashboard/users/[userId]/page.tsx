@@ -188,22 +188,40 @@ export default function EditUserPage() {
   }
 
   const handleActiveUser = async () => {
+    // legacy placeholder - not used
+    return
+  }
+
+  const handleToggleActive = async (checked: boolean) => {
     if (!token || !userId) return
 
-    setSavingUser(true);
+    const prev = formData.isActive
+    // optimistic update
+    setFormData((p) => ({ ...p, isActive: checked }))
+    setSavingUser(true)
     try {
-      await axios.put(
-        `/api-proxy/api/isync/auth/admin/users/${userId}/menus`,
-        { menus: menus.map(m => ({ menuCode: m.menuCode, canView: m.canView })) },
+      await axios.patch(
+        `/api-proxy/api/isync/auth/admin/users/${userId}/status`,
+        { isActive: checked },
         { headers: { Authorization: `Bearer ${token}` } }
       )
-      toast.success("Datos Guardados Correctamente");
+      toast.success(`Estado actualizado`)
     } catch (err) {
-      console.error("Error saving user:", err)
-      toast.error(`Error al guardar: ${err}`)
+      console.error("Error updating active status:", err)
+      // revert
+      setFormData((p) => ({ ...p, isActive: prev }))
+      toast.error("Error al actualizar estado")
     } finally {
       setSavingUser(false)
     }
+  }
+
+  const handleToggle = (key: string, checked: boolean) => {
+    if (key === "isActive") {
+      void handleToggleActive(checked)
+      return
+    }
+    setFormData((p) => ({ ...p, [key]: checked }))
   }
 
   const handleDeleteUser = async () => {
@@ -328,7 +346,8 @@ export default function EditUserPage() {
                   <Switch
                     className="cursor-pointer"
                     checked={formData[key as keyof typeof formData] as boolean}
-                    onCheckedChange={(checked) => setFormData({ ...formData, [key]: checked })}
+                    disabled={key === "isActive" ? savingUser : false}
+                    onCheckedChange={(checked) => handleToggle(key, Boolean(checked))}
                   />
                 </div>
               ))}
