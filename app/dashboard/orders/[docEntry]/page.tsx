@@ -205,7 +205,8 @@ export default function OrderDetailPage() {
         unitPriceNoVAT: line.unitPriceNoVAT,
         basePriceNoVAT: line.basePriceNoVAT,
         taxCode: line.taxCode,
-        warehouseCode: line.warehouseCode
+        warehouseCode: line.warehouseCode,
+        suppCatNum: line.suppCatNum,
       }
       if (line.barCode) product.barCode = line.barCode
       if (line.priceList) product.priceList = line.priceList
@@ -230,7 +231,7 @@ export default function OrderDetailPage() {
   return (
     <div className="min-h-fit dark:dark:bg-dark-page">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-white/80 dark:dark:bg-dark-page backdrop-blur-md border-b border-gray-100 dark:border-white/6">
+      <div className="sticky top-0 z-10 dark:dark:bg-dark-page backdrop-blur-md border-b border-gray-100 dark:border-white/6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
           {/* Breadcrumb */}
           <nav className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500 mb-2">

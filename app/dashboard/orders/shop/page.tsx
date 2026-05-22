@@ -391,6 +391,13 @@ function ProductCard({ product }: { product: Product }) {
   const isFletes = product.itemName?.toUpperCase().includes('FLETES')
   const isGroup120 = product.groupCode === '120'
   const canEditPrice = isFletes || isGroup120 || product.priceListNum !== 11
+  const taxPercent = (product.taxType === 'ISV' || product.taxCode === 'ISV') ? 0.15 : 0
+  const basePrice = product.price
+  const baseISV = parseFloat((basePrice * taxPercent).toFixed(4))
+  const baseTotal = parseFloat((basePrice + baseISV).toFixed(4))
+  const subtotal = parseFloat((editablePrice * quantity).toFixed(4))
+  const subtotalISV = parseFloat((subtotal * taxPercent).toFixed(4))
+  const subtotalTotal = parseFloat((subtotal + subtotalISV).toFixed(4))
 
   const fetchAnalytics = useCallback(async () => {
     if (!token || !selectedCustomer) return
@@ -741,8 +748,9 @@ function ProductCard({ product }: { product: Product }) {
                           </p>
                         )}
                         <p className="text-[10px] text-gray-400 dark:text-dark-text-disabled">
-                          Precio base original: L. {formatPrice(product.price).intPart}
-                          <span className="text-[10px]">.{formatPrice(product.price).decPart}</span> + {product.taxType}
+                          L. {formatPrice(basePrice).intPart}
+                          <span className="text-[10px]">.{formatPrice(basePrice).decPart}</span> + {product.taxType ?? product.taxCode ?? 'ISV'} = L. {formatPrice(baseTotal).intPart}
+                          <span className="text-[10px]">.{formatPrice(baseTotal).decPart}</span>
                         </p>
                         <p className="text-[10px] text-gray-400 dark:text-dark-text-disabled">{product.priceListName}</p>
                       </div>
@@ -979,12 +987,17 @@ function ProductCard({ product }: { product: Product }) {
               </span>
               <div className="flex items-baseline gap-0">
                 <span className="text-2xl sm:text-3xl font-black dark:text-dark-text-primary">
-                  L.{formatPrice(editablePrice * quantity).intPart}
+                  L.{formatPrice(subtotalTotal).intPart}
                 </span>
                 <span className="text-sm font-bold dark:text-dark-text-primary">
-                  .{formatPrice(editablePrice * quantity).decPart}
+                  .{formatPrice(subtotalTotal).decPart}
                 </span>
               </div>
+              <p className="text-[10px] text-gray-400 dark:text-dark-text-disabled mt-1">
+                L.{formatPrice(subtotal).intPart}
+                <span className="text-[10px]">.{formatPrice(subtotal).decPart}</span> + {product.taxType ?? product.taxCode ?? 'ISV'} = L.{formatPrice(subtotalTotal).intPart}
+                <span className="text-[10px]">.{formatPrice(subtotalTotal).decPart}</span>
+              </p>
             </div>
             <Button
               className="bg-brand-primary text-white hover:bg-brand-primary/90 rounded-full px-6 py-3 h-auto text-xs font-bold transition-transform active:scale-95"

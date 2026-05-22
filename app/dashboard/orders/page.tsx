@@ -310,124 +310,243 @@ export default function OrdersPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="relative">
+        <div className="flex flex-col md:flex-row items-center gap-2 w-full md:w-auto">
+          <div className="relative flex-1 w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={15} />
             <Input
               placeholder="Buscar Cotizacion..."
-              className="pl-9 h-9 w-48 bg-white border-gray-200 text-sm rounded-full"
+              className="pl-9 h-9 flex-1 w-full md:w-48 bg-white border-gray-200 text-sm rounded-full"
               value={searchQuotation}
               onChange={(e) => setSearchQuotation(e.target.value)}
             />
           </div>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-          >
-            <ArrowClockwise size={15} className={isRefreshing ? 'animate-spin' : ''} />
-            Actualizar
-          </Button>
+          <div className="flex flex-row items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+            >
+              <ArrowClockwise size={15} className={isRefreshing ? 'animate-spin' : ''} />
+              Actualizar
+            </Button>
 
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            {productsInCart.length === 0 && (
-              <DialogTrigger asChild>
-                <Button size="sm" variant="outline">
-                  <Plus size={15} />
-                  Nueva Cotizacion
-                </Button>
-              </DialogTrigger>
-            )}
-            <DialogContent className="sm:max-w-4xl h-[92vh] sm:h-[85vh] max-sm:w-full max-sm:max-w-full max-sm:rounded-b-none flex flex-col p-0 overflow-hidden">
-              <div className="flex h-full sm:divide-x sm:divide-gray-100 flex-col sm:flex-row">
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              {productsInCart.length === 0 && (
+                <DialogTrigger asChild>
+                  <Button size="sm" variant="outline">
+                    <Plus size={15} />
+                    Nueva Cotizacion
+                  </Button>
+                </DialogTrigger>
+              )}
+              <DialogContent className="sm:max-w-4xl h-[92vh] sm:h-[85vh] max-sm:w-full max-sm:max-w-full max-sm:rounded-b-none flex flex-col p-0 overflow-hidden">
+                <div className="flex h-full sm:divide-x sm:divide-gray-100 flex-col sm:flex-row">
 
-                {/* PANEL IZQUIERDO: solo visible en sm+ */}
-                <div className="hidden sm:flex w-72 bg-gray-50 border-r border-gray-100 flex-col">
-                  <div className="flex-1 overflow-y-auto p-5">
-                    {selectedCustomer ? (
-                      <div className="animate-in fade-in slide-in-from-left-2 duration-200">
-                        {/* Avatar + nombre */}
-                        <div className="flex flex-col items-center text-center mb-5">
-                          <Avvvatars size={72} value={selectedCustomer.cardName} style="character" />
-                          <h3 className="mt-3 font-bold text-gray-900 text-base leading-snug px-2">
-                            {selectedCustomer.cardName}
-                          </h3>
-                          <span className="mt-1.5 text-xs font-bold tracking-widest bg-brand-primary/10 text-brand-primary px-2.5 py-1 rounded-full uppercase">
-                            {selectedCustomer.cardCode}
-                          </span>
-                        </div>
-
-                        {/* Info */}
-                        <div className="space-y-3 mb-5">
-                          <div className="bg-white rounded-xl border border-gray-100 px-3 py-2.5">
-                            <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-0.5">RTN</p>
-                            <p className="text-sm font-semibold text-gray-700 truncate">{selectedCustomer.federalTaxID || '—'}</p>
+                  {/* PANEL IZQUIERDO: solo visible en sm+ */}
+                  <div className="hidden sm:flex w-72 bg-gray-50 border-r border-gray-100 flex-col">
+                    <div className="flex-1 overflow-y-auto p-5">
+                      {selectedCustomer ? (
+                        <div className="animate-in fade-in slide-in-from-left-2 duration-200">
+                          {/* Avatar + nombre */}
+                          <div className="flex flex-col items-center text-center mb-5">
+                            <Avvvatars size={72} value={selectedCustomer.cardName} style="character" />
+                            <h3 className="mt-3 font-bold text-gray-900 text-base leading-snug px-2">
+                              {selectedCustomer.cardName}
+                            </h3>
+                            <span className="mt-1.5 text-xs font-bold tracking-widest bg-brand-primary/10 text-brand-primary px-2.5 py-1 rounded-full uppercase">
+                              {selectedCustomer.cardCode}
+                            </span>
                           </div>
-                          <div className="bg-white rounded-xl border border-gray-100 px-3 py-2.5">
-                            <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-0.5">Lista de Precios</p>
-                            <p className="text-sm font-semibold text-gray-700">Lista #{selectedCustomer.priceListNum}</p>
-                          </div>
-                        </div>
 
-                        {/* Direcciones */}
-                        <div>
-                          <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2">
-                            Direcciones de entrega
-                          </p>
-                          {isLoadingAddresses ? (
-                            <div className="space-y-2">
-                              {[1, 2].map(i => (
-                                <div key={i} className="h-12 bg-gray-200 rounded-xl animate-pulse" />
-                              ))}
+                          {/* Info */}
+                          <div className="space-y-3 mb-5">
+                            <div className="bg-white rounded-xl border border-gray-100 px-3 py-2.5">
+                              <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-0.5">RTN</p>
+                              <p className="text-sm font-semibold text-gray-700 truncate">{selectedCustomer.federalTaxID || '—'}</p>
                             </div>
-                          ) : addresses.length > 0 ? (
-                            <div className="space-y-1.5">
-                              {addresses.map((addr) => (
-                                <button
-                                  key={addr.rowNum}
-                                  type="button"
-                                  onClick={() => setSelectedAddress(addr)}
-                                  className={`w-full text-left p-2.5 rounded-xl border transition-all ${selectedAddress?.rowNum === addr.rowNum
-                                    ? 'bg-brand-primary/5 border-brand-primary'
-                                    : 'bg-white hover:bg-gray-50 border-gray-100'
-                                    }`}
-                                >
-                                  <div className="flex items-start gap-2">
-                                    <MapPin size={14} className={`mt-0.5 shrink-0 ${selectedAddress?.rowNum === addr.rowNum ? 'text-brand-primary' : 'text-gray-400'}`} />
-                                    <div className="overflow-hidden">
-                                      <p className="text-xs font-bold text-gray-800 truncate">{addr.addressName}</p>
-                                      <p className="text-[11px] text-gray-500 truncate">{addr.street}</p>
+                            <div className="bg-white rounded-xl border border-gray-100 px-3 py-2.5">
+                              <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-0.5">Lista de Precios</p>
+                              <p className="text-sm font-semibold text-gray-700">Lista #{selectedCustomer.priceListNum}</p>
+                            </div>
+                          </div>
+
+                          {/* Direcciones */}
+                          <div>
+                            <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2">
+                              Direcciones de entrega
+                            </p>
+                            {isLoadingAddresses ? (
+                              <div className="space-y-2">
+                                {[1, 2].map(i => (
+                                  <div key={i} className="h-12 bg-gray-200 rounded-xl animate-pulse" />
+                                ))}
+                              </div>
+                            ) : addresses.length > 0 ? (
+                              <div className="space-y-1.5">
+                                {addresses.map((addr) => (
+                                  <button
+                                    key={addr.rowNum}
+                                    type="button"
+                                    onClick={() => setSelectedAddress(addr)}
+                                    className={`w-full text-left p-2.5 rounded-xl border transition-all ${selectedAddress?.rowNum === addr.rowNum
+                                      ? 'bg-brand-primary/5 border-brand-primary'
+                                      : 'bg-white hover:bg-gray-50 border-gray-100'
+                                      }`}
+                                  >
+                                    <div className="flex items-start gap-2">
+                                      <MapPin size={14} className={`mt-0.5 shrink-0 ${selectedAddress?.rowNum === addr.rowNum ? 'text-brand-primary' : 'text-gray-400'}`} />
+                                      <div className="overflow-hidden">
+                                        <p className="text-xs font-bold text-gray-800 truncate">{addr.addressName}</p>
+                                        <p className="text-[11px] text-gray-500 truncate">{addr.street}</p>
+                                      </div>
                                     </div>
-                                  </div>
-                                </button>
-                              ))}
-                            </div>
-                          ) : (
-                            <p className="text-xs text-gray-400 italic">Sin direcciones registradas.</p>
-                          )}
+                                  </button>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-xs text-gray-400 italic">Sin direcciones registradas.</p>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center h-full min-h-50 text-center gap-3 opacity-40">
-                        <div className="w-14 h-14 bg-gray-200 rounded-2xl flex items-center justify-center">
-                          <Search size={24} className="text-gray-400" />
+                      ) : (
+                        <div className="flex flex-col items-center justify-center h-full min-h-50 text-center gap-3 opacity-40">
+                          <div className="w-14 h-14 bg-gray-200 rounded-2xl flex items-center justify-center">
+                            <Search size={24} className="text-gray-400" />
+                          </div>
+                          <p className="text-xs text-gray-500">Selecciona un cliente</p>
                         </div>
-                        <p className="text-xs text-gray-500">Selecciona un cliente</p>
+                      )}
+                    </div>
+
+                    {/* CTA */}
+                    {selectedCustomer && (
+                      <div className="p-4 border-t border-gray-100">
+                        <button
+                          onClick={() => {
+                            setIsDialogOpen(false);
+                            router.push('/dashboard/orders/shop');
+                          }}
+                          className="w-full bg-brand-primary cursor-pointer text-white text-sm font-semibold h-11 rounded-full transition-all hover:bg-brand-primary/90 flex items-center justify-center gap-2"
+                        >
+                          {addresses.length > 0 ? 'Realizar Cotizacion' : 'Continuar sin Ubicación'}
+                          <ArrowRight size={16} />
+                        </button>
                       </div>
                     )}
                   </div>
 
-                  {/* CTA */}
+                  {/* PANEL DERECHO: BUSCADOR Y LISTA */}
+                  <div className="flex-1 flex flex-col bg-white overflow-hidden min-h-0">
+                    <DialogHeader className="px-6 pt-5 pb-3">
+                      <DialogTitle className="text-2xl font-bold">Seleccionar Cliente</DialogTitle>
+                      <DialogDescription className="text-sm">
+                        Busca por nombre o código SAP
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="px-6 pb-3">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={17} />
+                        <Input
+                          placeholder="Nombre o código SAP..."
+                          className="pl-9 h-11 bg-gray-50 border-gray-200 focus:bg-white text-sm transition-all"
+                          value={customerSearch}
+                          onChange={(e) => setCustomerSearch(e.target.value)}
+                          autoFocus
+                        />
+                      </div>
+                    </div>
+
+                    <div id="customer-list-container" className="flex-1 overflow-y-auto px-6 pb-6">
+                      {isLoadingCustomers && customers.length === 0 ? (
+                        <div className="space-y-2 pt-1">
+                          {Array.from({ length: 8 }).map((_, i) => (
+                            <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 animate-pulse">
+                              <div className="w-9 h-9 rounded-full bg-gray-200 shrink-0" />
+                              <div className="flex-1 space-y-1.5">
+                                <div className="h-3 bg-gray-200 rounded-full w-2/3" />
+                                <div className="h-2.5 bg-gray-100 rounded-full w-1/3" />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="space-y-1 pt-1">
+                          {customers.map((customer) => {
+                            const isSelected = selectedCustomer?.cardCode === customer.cardCode;
+                            return (
+                              <button
+                                key={customer.cardCode}
+                                type="button"
+                                onClick={() => {
+                                  if (!isSelected) {
+                                    if (session?.user.salesPersonCode && customer.slpCode && session?.user.salesPersonCode !== customer.slpCode) {
+                                      setPendingCustomer(customer);
+                                    } else {
+                                      setSelectedCustomer(customer);
+                                      logClient({ level: 'INFO', category: 'CLIENTES', message: `Cliente seleccionado: ${customer.cardName} (${customer.cardCode})`, pageUrl: '/dashboard/orders', userId: session?.user.fullName ?? undefined });
+                                    }
+                                  }
+                                }}
+                                className={`w-full text-left p-3 rounded-xl border transition-all flex items-center gap-3 ${isSelected
+                                  ? 'border-brand-primary bg-brand-primary/5 ring-1 ring-brand-primary/30'
+                                  : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50'
+                                  }`}
+                              >
+                                <Avvvatars size={40} value={customer.cardName} style="character" />
+                                <div className="flex-1 min-w-0">
+                                  <p className={`text-sm font-semibold truncate ${isSelected ? 'text-brand-primary' : 'text-gray-900'}`}>
+                                    {customer.cardName}
+                                  </p>
+                                  <p className="text-xs text-gray-400 font-mono">{customer.cardCode}</p>
+                                </div>
+                                {isSelected && (
+                                  <div className="shrink-0 w-5 h-5 rounded-full bg-brand-primary flex items-center justify-center">
+                                    <Check size={11} className="text-white" strokeWidth={3} />
+                                  </div>
+                                )}
+                              </button>
+                            );
+                          })}
+
+                          {customers.length === 0 && !isLoadingCustomers && (
+                            <div className="text-center py-12">
+                              <p className="text-sm text-gray-400">Sin resultados para <span className="font-semibold">"{customerSearch}"</span></p>
+                            </div>
+                          )}
+
+                          <div id="customer-scroll-sentinel" className="h-4" />
+
+                          {isLoadingCustomers && customers.length > 0 && (
+                            <div className="flex items-center justify-center py-3 gap-2">
+                              <Loader2 size={14} className="text-brand-primary animate-spin" />
+                              <span className="text-xs text-gray-400">Cargando más...</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* BARRA INFERIOR MOBILE: cliente seleccionado + CTA */}
                   {selectedCustomer && (
-                    <div className="p-4 border-t border-gray-100">
+                    <div className="sm:hidden shrink-0 border-t border-gray-100 bg-white px-4 py-3 animate-in slide-in-from-bottom-2 duration-200">
+                      <div className="flex items-center gap-3 mb-3">
+                        <Avvvatars size={38} value={selectedCustomer.cardName} style="character" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-bold text-gray-900 truncate">{selectedCustomer.cardName}</p>
+                          <p className="text-xs text-gray-400 font-mono">{selectedCustomer.cardCode}</p>
+                        </div>
+                        {isLoadingAddresses && <Loader2 size={15} className="text-brand-primary animate-spin shrink-0" />}
+                      </div>
                       <button
                         onClick={() => {
                           setIsDialogOpen(false);
                           router.push('/dashboard/orders/shop');
                         }}
-                        className="w-full bg-brand-primary cursor-pointer text-white text-sm font-semibold h-11 rounded-full transition-all hover:bg-brand-primary/90 flex items-center justify-center gap-2"
+                        className="w-full bg-brand-primary text-white text-sm font-semibold h-11 rounded-full flex items-center justify-center gap-2"
                       >
                         {addresses.length > 0 ? 'Realizar Cotizacion' : 'Continuar sin Ubicación'}
                         <ArrowRight size={16} />
@@ -435,126 +554,9 @@ export default function OrdersPage() {
                     </div>
                   )}
                 </div>
-
-                {/* PANEL DERECHO: BUSCADOR Y LISTA */}
-                <div className="flex-1 flex flex-col bg-white overflow-hidden min-h-0">
-                  <DialogHeader className="px-6 pt-5 pb-3">
-                    <DialogTitle className="text-2xl font-bold">Seleccionar Cliente</DialogTitle>
-                    <DialogDescription className="text-sm">
-                      Busca por nombre o código SAP
-                    </DialogDescription>
-                  </DialogHeader>
-
-                  <div className="px-6 pb-3">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={17} />
-                      <Input
-                        placeholder="Nombre o código SAP..."
-                        className="pl-9 h-11 bg-gray-50 border-gray-200 focus:bg-white text-sm transition-all"
-                        value={customerSearch}
-                        onChange={(e) => setCustomerSearch(e.target.value)}
-                        autoFocus
-                      />
-                    </div>
-                  </div>
-
-                  <div id="customer-list-container" className="flex-1 overflow-y-auto px-6 pb-6">
-                    {isLoadingCustomers && customers.length === 0 ? (
-                      <div className="space-y-2 pt-1">
-                        {Array.from({ length: 8 }).map((_, i) => (
-                          <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 animate-pulse">
-                            <div className="w-9 h-9 rounded-full bg-gray-200 shrink-0" />
-                            <div className="flex-1 space-y-1.5">
-                              <div className="h-3 bg-gray-200 rounded-full w-2/3" />
-                              <div className="h-2.5 bg-gray-100 rounded-full w-1/3" />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="space-y-1 pt-1">
-                        {customers.map((customer) => {
-                          const isSelected = selectedCustomer?.cardCode === customer.cardCode;
-                          return (
-                            <button
-                              key={customer.cardCode}
-                              type="button"
-                              onClick={() => {
-                                if (!isSelected) {
-                                  if (session?.user.salesPersonCode && customer.slpCode && session?.user.salesPersonCode !== customer.slpCode) {
-                                    setPendingCustomer(customer);
-                                  } else {
-                                    setSelectedCustomer(customer);
-                                    logClient({ level: 'INFO', category: 'CLIENTES', message: `Cliente seleccionado: ${customer.cardName} (${customer.cardCode})`, pageUrl: '/dashboard/orders', userId: session?.user.fullName ?? undefined });
-                                  }
-                                }
-                              }}
-                              className={`w-full text-left p-3 rounded-xl border transition-all flex items-center gap-3 ${isSelected
-                                ? 'border-brand-primary bg-brand-primary/5 ring-1 ring-brand-primary/30'
-                                : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50'
-                                }`}
-                            >
-                              <Avvvatars size={40} value={customer.cardName} style="character" />
-                              <div className="flex-1 min-w-0">
-                                <p className={`text-sm font-semibold truncate ${isSelected ? 'text-brand-primary' : 'text-gray-900'}`}>
-                                  {customer.cardName}
-                                </p>
-                                <p className="text-xs text-gray-400 font-mono">{customer.cardCode}</p>
-                              </div>
-                              {isSelected && (
-                                <div className="shrink-0 w-5 h-5 rounded-full bg-brand-primary flex items-center justify-center">
-                                  <Check size={11} className="text-white" strokeWidth={3} />
-                                </div>
-                              )}
-                            </button>
-                          );
-                        })}
-
-                        {customers.length === 0 && !isLoadingCustomers && (
-                          <div className="text-center py-12">
-                            <p className="text-sm text-gray-400">Sin resultados para <span className="font-semibold">"{customerSearch}"</span></p>
-                          </div>
-                        )}
-
-                        <div id="customer-scroll-sentinel" className="h-4" />
-
-                        {isLoadingCustomers && customers.length > 0 && (
-                          <div className="flex items-center justify-center py-3 gap-2">
-                            <Loader2 size={14} className="text-brand-primary animate-spin" />
-                            <span className="text-xs text-gray-400">Cargando más...</span>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* BARRA INFERIOR MOBILE: cliente seleccionado + CTA */}
-                {selectedCustomer && (
-                  <div className="sm:hidden shrink-0 border-t border-gray-100 bg-white px-4 py-3 animate-in slide-in-from-bottom-2 duration-200">
-                    <div className="flex items-center gap-3 mb-3">
-                      <Avvvatars size={38} value={selectedCustomer.cardName} style="character" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-gray-900 truncate">{selectedCustomer.cardName}</p>
-                        <p className="text-xs text-gray-400 font-mono">{selectedCustomer.cardCode}</p>
-                      </div>
-                      {isLoadingAddresses && <Loader2 size={15} className="text-brand-primary animate-spin shrink-0" />}
-                    </div>
-                    <button
-                      onClick={() => {
-                        setIsDialogOpen(false);
-                        router.push('/dashboard/orders/shop');
-                      }}
-                      className="w-full bg-brand-primary text-white text-sm font-semibold h-11 rounded-full flex items-center justify-center gap-2"
-                    >
-                      {addresses.length > 0 ? 'Realizar Cotizacion' : 'Continuar sin Ubicación'}
-                      <ArrowRight size={16} />
-                    </button>
-                  </div>
-                )}
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </div>
 

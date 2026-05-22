@@ -85,6 +85,7 @@ function CartISync() {
   const [orderId, setOrderId] = useState<string | null>(null)
 
   const isProcessing = useRef(false)
+  const TAX_RATE = 0.15
 
   useEffect(() => {
     if (productsInCart.length === 0 && open) {
@@ -304,9 +305,12 @@ function CartISync() {
                 {productsInCart.map(item => {
                   const unitPrice = (item.priceAfterVAT ?? item.unitPriceNoVAT ?? item.priceList ?? 0)
                   const quantity = item.quantity ?? 0
-                  const totalPrice = unitPrice * quantity
                   const sku = item.suppCatNum
                   const taxCode = item.taxCode
+                  const isExempt = taxCode === "EXO" || taxCode === "EXE"
+                  const unitPriceGross = isExempt ? unitPrice : unitPrice * (1 + TAX_RATE)
+                  const totalPrice = unitPrice * quantity
+                  const totalPriceGross = unitPriceGross * quantity
 
                   return (
                     <div
@@ -337,11 +341,8 @@ function CartISync() {
                           <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-brand-primary/10 dark:bg-dark-card text-brand-primary dark:text-dark-text-secondary font-medium">
                             SKU: {sku}
                           </span>
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-brand-primary/10 dark:bg-dark-card text-brand-primary dark:text-dark-text-secondary font-medium">
-                            {taxCode}
-                          </span>
                           <span className="text-gray-500 dark:text-dark-text-muted">
-                            L. <PriceDisplay price={unitPrice} decimalNum={4} /> c/u
+                            L. <PriceDisplay price={unitPrice} decimalNum={4} /> + {taxCode} = L. <PriceDisplay price={unitPriceGross} decimalNum={4} /> c/u
                           </span>
                         </div>
                       </div>
@@ -375,13 +376,13 @@ function CartISync() {
                 <div className="flex justify-between text-xs md:text-sm">
                   <span className="text-gray-500 dark:text-dark-text-muted">Subtotal</span>
                   <span className="font-medium dark:text-dark-text-secondary">
-                    L. {subtotal.toLocaleString("es-HN", { minimumFractionDigits: 2 })}
+                    L. <PriceDisplay price={subtotal} decimalNum={2} />
                   </span>
                 </div>
                 <div className="flex justify-between text-xs md:text-sm">
                   <span className="text-gray-500 dark:text-dark-text-muted">ISV (15%)</span>
                   <span className="font-medium dark:text-dark-text-secondary">
-                    L. {calculatedTax.toLocaleString("es-HN", { minimumFractionDigits: 2 })}
+                    L. <PriceDisplay price={calculatedTax} decimalNum={2} />
                   </span>
                 </div>
                 <div className="flex justify-between text-base md:text-lg pt-3 md:pt-4 border-t border-gray-200 dark:border-white/6">
@@ -389,7 +390,7 @@ function CartISync() {
                     Total
                   </span>
                   <span className="font-bold dark:text-dark-text-primary">
-                    L. {total.toLocaleString("es-HN", { minimumFractionDigits: 2 })}
+                    L. <PriceDisplay price={total} decimalNum={2} />
                   </span>
                 </div>
               </div>

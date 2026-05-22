@@ -20,9 +20,10 @@ export default function DashboardLayout({
   return (
     <ThemeProvider
       attribute="class"
-      defaultTheme="system"
+      defaultTheme="light"
       enableSystem
       disableTransitionOnChange
+      storageKey="theme-isync"
     >
       <SidebarProvider defaultOpen={true}>
         <AppSidebar />
