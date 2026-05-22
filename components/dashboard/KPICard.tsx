@@ -1,10 +1,10 @@
 "use client"
 
 import { ArrowDown, ArrowUp } from "lucide-react"
-import { useAuthStore } from '@/lib/store'
 import { useEffect, useState, useRef } from "react"
 import { usePathname } from "next/navigation"
 import axios from "axios"
+import { useSession } from "next-auth/react"
 
 // Definición de tipos
 interface VentasData {
@@ -24,7 +24,10 @@ interface KpiApiResponse {
 }
 
 export default function KPICardApi() {
-  const { salesPersonCode, fullName, token } = useAuthStore()
+  const { data: session } = useSession();
+  const token = session?.user.token
+  const salesPersonCode = session?.user.salesPersonCode
+  const fullName = session?.user.fullName
   const pathname = usePathname()
   const prevTokenRef = useRef<string | null>(null)
   const [data, setData] = useState<KpiApiResponse | null>(null)

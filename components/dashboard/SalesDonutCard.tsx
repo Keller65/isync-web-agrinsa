@@ -3,10 +3,10 @@
 import { useMemo, useEffect, useState, useRef } from "react"
 import { Doughnut } from "react-chartjs-2"
 import { Chart as ChartJS, ArcElement, Tooltip } from "chart.js"
-import { useAuthStore } from '@/lib/store'
 import { usePathname } from "next/navigation"
-import { SalesDonutTypes } from "@/types/dashboar"
+import { SalesDonutTypes } from "@/types/dashboard"
 import axios from "axios"
+import { useSession } from "next-auth/react"
 
 ChartJS.register(ArcElement, Tooltip)
 
@@ -14,7 +14,9 @@ export default function SalesDonutCard() {
   const [data, setData] = useState<SalesDonutTypes | null>(null)
   const [loading, setLoading] = useState(true)
   const [goal, setGoal] = useState(20);
-  const { token, salesPersonCode } = useAuthStore()
+  const { data: session } = useSession();
+  const token = session?.user.token
+  const salesPersonCode = session?.user.salesPersonCode
   const pathname = usePathname()
   const prevTokenRef = useRef<string | null>(null)
 
