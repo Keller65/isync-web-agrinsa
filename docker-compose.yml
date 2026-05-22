@@ -1,8 +1,8 @@
 services:
-  isync-web:
+  isync-web-agrinsa:
     build: .
     image: demo:latest
-    container_name: isync
+    container_name: isync-web-agrinsa    docker tag <IMAGE_ID_or_SOURCE_REPO:TAG> isynccorporation/isync-web-agrinsa:latest
     ports:
       - "3000:3000"
     env_file:
