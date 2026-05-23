@@ -52,8 +52,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               fullName: apiData.fullName,
               u_WhsCode: apiData.u_WhsCode,
               u_SerieCot: apiData.u_SerieCot,
-              // qrCodeBase64: apiData.qrCodeBase64 ?? null,
-              // manualKey: apiData.manualKey ?? null,
+              qrCodeBase64: apiData.qrCodeBase64 ?? null,
+              manualKey: apiData.manualKey ?? null,
               email: `${apiData.salesPersonCode}@isync.local`,
               isMasterAdmin: apiData.isMasterAdmin ?? false,
               menus: apiData.menus ?? [],
@@ -84,8 +84,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.u_WhsCode = user.u_WhsCode
         token.u_SerieCot = user.u_SerieCot
         token.requiresTwoFactorSetup = user.requiresTwoFactorSetup
-        // token.qrCodeBase64 = user.qrCodeBase64
-        // token.manualKey = user.manualKey
+        token.qrCodeBase64 = user.qrCodeBase64
+        token.manualKey = user.manualKey
         token.isMasterAdmin = user.isMasterAdmin
         token.menus = user.menus
       }
@@ -107,8 +107,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.u_WhsCode = token.u_WhsCode
         session.user.u_SerieCot = token.u_SerieCot
         session.user.requiresTwoFactorSetup = token.requiresTwoFactorSetup
-        // session.user.qrCodeBase64 = token.qrCodeBase64
-        // session.user.manualKey = token.manualKey
+        session.user.qrCodeBase64 = token.qrCodeBase64
+        session.user.manualKey = token.manualKey
         session.user.isMasterAdmin = token.isMasterAdmin
         session.user.menus = token.menus
       }
