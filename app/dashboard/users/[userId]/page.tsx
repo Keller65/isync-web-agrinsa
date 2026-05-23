@@ -8,6 +8,17 @@ import Avvvatars from "avvvatars-react"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Input } from "@/components/ui/input"
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog"
 import { useSession } from "next-auth/react"
 import { AdminUser, MenuItemResponse } from "@/types/api-types"
 import { toast } from "sonner"
@@ -99,9 +110,6 @@ export default function EditUserPage() {
   const handleReset2FA = async () => {
     if (!token || !userId || resetting2FA) return
 
-    const confirmed = window.confirm("¿Estás seguro de resetear el 2FA de este usuario?")
-    if (!confirmed) return
-
     setResetting2FA(true)
     try {
       await axios.patch(
@@ -120,9 +128,6 @@ export default function EditUserPage() {
 
   const handleResetPassword = async () => {
     if (!token || !userId || resettingPassword || !newPassword) return
-
-    const confirmed = window.confirm("¿Estás seguro de cambiar la password de este usuario?")
-    if (!confirmed) return
 
     setResettingPassword(true)
     try {
@@ -262,6 +267,9 @@ export default function EditUserPage() {
   }
 
   const handleDeleteUser = async () => {
+    if (!token || !userId || deleteUser) return
+
+    setDeleteUser(true)
     try {
       const response = await axios.delete(
         `/api-proxy/api/isync/auth/admin/users/${userId}`,
@@ -273,7 +281,6 @@ export default function EditUserPage() {
       })
 
       console.log(response.data);
-      setDeleteUser(true)
       router.replace('/dashboard/users')
     } catch (error) {
       setDeleteUser(false)
@@ -432,30 +439,76 @@ export default function EditUserPage() {
             </div>
 
             <section className="flex flex-row gap-2">
-              <Button
-                variant="outline"
-                onClick={handleResetPassword}
-                disabled={resettingPassword || !newPassword}
-                className="text-blue-600 border-blue-200 hover:bg-blue-50 dark:text-dark-text-secondary dark:border-white/[0.07] dark:hover:bg-dark-raised"
-              >
-                {resettingPassword ? "Cambiando..." : "Cambiar Contraseña"}
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={handleReset2FA}
-                disabled={resetting2FA}
-              >
-                {resetting2FA ? "Resetando..." : "Resetear 2FA"}
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    disabled={resettingPassword || !newPassword}
+                    className="text-blue-600 border-blue-200 hover:bg-blue-50 dark:text-dark-text-secondary dark:border-white/[0.07] dark:hover:bg-dark-raised"
+                  >
+                    {resettingPassword ? "Cambiando..." : "Cambiar Contraseña"}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Confirmar cambio de contraseña</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      ¿Estás seguro de cambiar la contraseña de este usuario?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleResetPassword}>
+                      Confirmar
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" disabled={resetting2FA}>
+                    {resetting2FA ? "Resetando..." : "Resetear 2FA"}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Confirmar reset 2FA</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      ¿Estás seguro de resetear el 2FA de este usuario?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction variant="destructive" onClick={handleReset2FA}>
+                      Confirmar
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
 
               {!formData.isMasterAdmin && (
-                <Button
-                  variant="destructive"
-                  onClick={handleDeleteUser}
-                  disabled={formData.isMasterAdmin || deleteUser}
-                >
-                  {deleteUser ? "Eliminando..." : "Eliminar Usuario"}
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" disabled={formData.isMasterAdmin || deleteUser}>
+                      {deleteUser ? "Eliminando..." : "Eliminar Usuario"}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Eliminar usuario</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        ¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction variant="destructive" onClick={handleDeleteUser}>
+                        Eliminar
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               )}
             </section>
           </div>
