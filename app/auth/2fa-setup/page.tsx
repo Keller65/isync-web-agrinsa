@@ -69,6 +69,11 @@ export default function TwoFactorSetupPage() {
     }
   }
 
+  const handleCancel = async () => {
+    await signOut({ redirect: false })
+    router.replace("/")
+  }
+
   if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -176,7 +181,7 @@ export default function TwoFactorSetupPage() {
             <Button
               type="button"
               variant="ghost"
-              onClick={() => signOut({ redirectTo: "/" })}
+              onClick={handleCancel}
               className="cursor-pointer disabled:cursor-not-allowed"
             >
               Cancelar
