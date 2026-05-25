@@ -176,7 +176,7 @@ export default function TwoFactorSetupPage() {
             <Button
               type="button"
               variant="ghost"
-              onClick={() => signOut({ callbackUrl: "/" })}
+              onClick={() => signOut({ redirectTo: "/" })}
               className="cursor-pointer disabled:cursor-not-allowed"
             >
               Cancelar
