@@ -53,7 +53,7 @@ const items = [
     ],
   },
   {
-    title: "Utilidades",
+    title: "Administracion",
     items: [
       {
         title: "Usuarios",

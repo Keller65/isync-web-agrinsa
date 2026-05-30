@@ -3,12 +3,11 @@
 import { useEffect, useState, useCallback } from "react"
 import axios from "axios"
 import { useSession } from "next-auth/react"
-import { useInvoiceStore, SelectedInvoice } from "@/lib/store/store.invoice"
+import { useInvoiceStore } from "@/lib/store/store.invoice"
 import { InvoiceType } from "@/types/orders"
-import { FileText, Calendar, Trash, User, Loader2, Check, X } from "lucide-react"
+import { FileText, Trash, User, Loader2, Check } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import Avvvatars from "avvvatars-react"
 
 interface PendingInvoicesModalProps {
   open: boolean
