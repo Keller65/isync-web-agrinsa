@@ -4,6 +4,7 @@ import "./globals.css";
 import AuthProvider from "@/components/auth/auth-provider"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import SessionGate from "@/components/auth/SessionGate";
+import { ThemeProvider } from "@/components/theme/theme-provider";
 
 export const metadata: Metadata = {
   title: "iSync Web - Todo Sincronizado",
@@ -18,15 +19,22 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-
-        <AuthProvider>
-          <TooltipProvider>
-            <SessionGate>
-              <main>{children}</main>
-            </SessionGate>
-          </TooltipProvider>
-        </AuthProvider>
-        <Toaster theme="light" richColors closeButton position="top-right" />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+          storageKey="theme-isync"
+        >
+          <AuthProvider>
+            <TooltipProvider>
+              <SessionGate>
+                <main>{children}</main>
+              </SessionGate>
+            </TooltipProvider>
+          </AuthProvider>
+          <Toaster theme="light" richColors closeButton position="top-right" />
+        </ThemeProvider>
       </body>
     </html>
   );
