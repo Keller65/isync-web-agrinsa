@@ -11,7 +11,7 @@ export default function Layout({
 }) {
   const { data } = useSession();
 
-  if (data?.user.isMasterAdmin) {
+  if (!data?.user.isMasterAdmin) {
     return (
       <div className="flex-1 w-full bg-gray-50 dark:bg-dark-page">
         <div className="flex flex-col items-center justify-center min-h-[92vh] p-8">

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import axios from "axios"
-import { EyeIcon, EyeSlashIcon, PencilSimple, Plus, User as UserIcon } from "@phosphor-icons/react"
+import { EyeIcon, EyeSlashIcon, PencilSimple, Plus, User as UserIcon, UserCircle, EnvelopeSimple, Lock, Hash, Monitor, DeviceMobile, ShieldCheck, Spinner, X } from "@phosphor-icons/react"
 import Avvvatars from "avvvatars-react"
 import {
   Dialog,
@@ -164,53 +164,108 @@ export default function Page() {
           <p>No hay usuarios registrados</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {users.map((user) => (
-            <div
-              key={user.id}
-              className="flex items-center gap-4 p-4 bg-white dark:bg-dark-card border border-gray-200 dark:border-white/[0.07] rounded-lg hover:bg-gray-50/50 dark:hover:bg-dark-raised transition-colors"
-            >
-              <Avvvatars value={user.email} style="shape" size={48} />
+        <div className="space-y-6">
+          {users.filter(u => u.isMasterAdmin).length > 0 && (
+            <div>
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary mb-3 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-blue-500" />
+                Administradores
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {users.filter(u => u.isMasterAdmin).map((user) => (
+                  <div
+                    key={user.id}
+                    className="flex items-center gap-4 p-4 bg-white dark:bg-dark-card border border-gray-200 dark:border-white/[0.07] rounded-lg hover:bg-gray-50/50 dark:hover:bg-dark-raised transition-colors"
+                  >
+                    <Avvvatars value={user.email} style="shape" size={48} />
 
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-medium truncate dark:text-dark-text-primary">{user.name}</h3>
-                  <span className={`w-2 h-2 rounded-full shrink-0 ${user.active ? "bg-green-500" : "bg-gray-300 dark:bg-dark-text-disabled"}`} />
-                </div>
-                <p className="text-sm text-gray-500 dark:text-dark-text-muted truncate">{user.email}</p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-medium truncate dark:text-dark-text-primary">{user.name}</h3>
+                        <span className={`w-2 h-2 rounded-full shrink-0 ${user.active ? "bg-green-500" : "bg-gray-300 dark:bg-dark-text-disabled"}`} />
+                      </div>
+                      <p className="text-sm text-gray-500 dark:text-dark-text-muted truncate">{user.email}</p>
+                    </div>
+
+                    <div className="hidden md:flex items-center gap-4 text-sm">
+                      <div className="text-center">
+                        <p className="text-gray-400 dark:text-dark-text-disabled text-xs uppercase tracking-wider">2FA</p>
+                        <p className={`font-medium ${user.twoFactorEnabled ? "text-green-600 dark:text-green-400" : "text-gray-400 dark:text-dark-text-disabled"}`}>
+                          {user.twoFactorEnabled ? "Activo" : "Inactivo"}
+                        </p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-gray-400 dark:text-dark-text-disabled text-xs uppercase tracking-wider">Estado</p>
+                        <p className={`font-medium ${user.active ? "text-green-600 dark:text-green-400" : "text-gray-400 dark:text-dark-text-disabled"}`}>
+                          {user.active ? "Activo" : "Inactivo"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleEditClick(user)}
+                      className="text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-raised"
+                    >
+                      <PencilSimple size={20} />
+                    </Button>
+                  </div>
+                ))}
               </div>
-
-              <div className="hidden md:flex items-center gap-4 text-sm">
-                <div className="text-center">
-                  <p className="text-gray-400 dark:text-dark-text-disabled text-xs uppercase tracking-wider">Admin</p>
-                  <p className={`font-medium ${user.isMasterAdmin ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-dark-text-disabled"}`}>
-                    {user.isMasterAdmin ? "Sí" : "No"}
-                  </p>
-                </div>
-                <div className="text-center">
-                  <p className="text-gray-400 dark:text-dark-text-disabled text-xs uppercase tracking-wider">2FA</p>
-                  <p className={`font-medium ${user.twoFactorEnabled ? "text-green-600 dark:text-green-400" : "text-gray-400 dark:text-dark-text-disabled"}`}>
-                    {user.twoFactorEnabled ? "Activo" : "Inactivo"}
-                  </p>
-                </div>
-                <div className="text-center">
-                  <p className="text-gray-400 dark:text-dark-text-disabled text-xs uppercase tracking-wider">Estado</p>
-                  <p className={`font-medium ${user.active ? "text-green-600 dark:text-green-400" : "text-gray-400 dark:text-dark-text-disabled"}`}>
-                    {user.active ? "Activo" : "Inactivo"}
-                  </p>
-                </div>
-              </div>
-
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleEditClick(user)}
-                className="text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-raised"
-              >
-                <PencilSimple size={20} />
-              </Button>
             </div>
-          ))}
+          )}
+
+          {users.filter(u => !u.isMasterAdmin).length > 0 && (
+            <div>
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-dark-text-secondary mb-3 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-gray-400" />
+                Usuarios
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {users.filter(u => !u.isMasterAdmin).map((user) => (
+                  <div
+                    key={user.id}
+                    className="flex items-center gap-4 p-4 bg-white dark:bg-dark-card border border-gray-200 dark:border-white/[0.07] rounded-lg hover:bg-gray-50/50 dark:hover:bg-dark-raised transition-colors"
+                  >
+                    <Avvvatars value={user.email} style="shape" size={48} />
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-medium truncate dark:text-dark-text-primary">{user.name}</h3>
+                        <span className={`w-2 h-2 rounded-full shrink-0 ${user.active ? "bg-green-500" : "bg-gray-300 dark:bg-dark-text-disabled"}`} />
+                      </div>
+                      <p className="text-sm text-gray-500 dark:text-dark-text-muted truncate">{user.email}</p>
+                    </div>
+
+                    <div className="hidden md:flex items-center gap-4 text-sm">
+                      <div className="text-center">
+                        <p className="text-gray-400 dark:text-dark-text-disabled text-xs uppercase tracking-wider">2FA</p>
+                        <p className={`font-medium ${user.twoFactorEnabled ? "text-green-600 dark:text-green-400" : "text-gray-400 dark:text-dark-text-disabled"}`}>
+                          {user.twoFactorEnabled ? "Activo" : "Inactivo"}
+                        </p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-gray-400 dark:text-dark-text-disabled text-xs uppercase tracking-wider">Estado</p>
+                        <p className={`font-medium ${user.active ? "text-green-600 dark:text-green-400" : "text-gray-400 dark:text-dark-text-disabled"}`}>
+                          {user.active ? "Activo" : "Inactivo"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleEditClick(user)}
+                      className="text-gray-400 dark:text-dark-text-muted hover:text-gray-700 dark:hover:text-dark-text-primary hover:bg-gray-100 dark:hover:bg-dark-raised"
+                    >
+                      <PencilSimple size={20} />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -225,7 +280,10 @@ export default function Page() {
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Nombre de usuario</label>
+              <label className="text-sm font-medium flex items-center gap-2">
+                <UserCircle size={16} className="text-gray-500" />
+                Nombre de usuario
+              </label>
               <Input
                 value={createForm.username}
                 onChange={(e) => setCreateForm({ ...createForm, username: e.target.value })}
@@ -233,16 +291,22 @@ export default function Page() {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Correo electrónico</label>
+              <label className="text-sm font-medium flex items-center gap-2">
+                <EnvelopeSimple size={16} className="text-gray-500" />
+                Correo electrónico
+              </label>
               <Input
                 type="email"
                 value={createForm.email}
                 onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
-                placeholder="Ingrese el Correo"
+                placeholder="Ingrese el Correo (Opcional)"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Contraseña</label>
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Lock size={16} className="text-gray-500" />
+                Contraseña
+              </label>
               <div className="relative">
                 <Input
                   type={showPassword ? "text" : "password"}
@@ -260,7 +324,10 @@ export default function Page() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Sales Person Code</label>
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <Hash size={16} className="text-gray-500" />
+                  Sales Person Code
+                </label>
                 <Input
                   type="number"
                   value={createForm.salesPersonCode}
@@ -270,21 +337,30 @@ export default function Page() {
               </div>
             </div>
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium">Permitir login web</label>
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Monitor size={16} className="text-gray-500" />
+                Permitir login web
+              </label>
               <Switch
                 checked={createForm.canLoginWeb}
                 onCheckedChange={(checked) => setCreateForm({ ...createForm, canLoginWeb: checked })}
               />
             </div>
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium">Permitir login app</label>
+              <label className="text-sm font-medium flex items-center gap-2">
+                <DeviceMobile size={16} className="text-gray-500" />
+                Permitir login app
+              </label>
               <Switch
                 checked={createForm.canLoginApp}
                 onCheckedChange={(checked) => setCreateForm({ ...createForm, canLoginApp: checked })}
               />
             </div>
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium">Es administrador maestro</label>
+              <label className="text-sm font-medium flex items-center gap-2">
+                <ShieldCheck size={16} className="text-gray-500" />
+                Es administrador maestro
+              </label>
               <Switch
                 checked={createForm.isMasterAdmin}
                 onCheckedChange={(checked) => setCreateForm({ ...createForm, isMasterAdmin: checked })}
@@ -293,14 +369,16 @@ export default function Page() {
           </div>
 
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setIsCreateModalOpen(false)} className="flex-1">
+            <Button variant="outline" onClick={() => setIsCreateModalOpen(false)} className="flex-1 gap-2">
+              <X size={16} />
               Cancelar
             </Button>
             <Button
               onClick={handleCreateUser}
               disabled={creating || !createForm.username || !createForm.password}
-              className="flex-1"
+              className="flex-1 gap-2"
             >
+              {creating ? <Spinner size={16} className="animate-spin" /> : <Plus size={16} />}
               {creating ? "Creando..." : "Crear usuario"}
             </Button>
           </DialogFooter>
